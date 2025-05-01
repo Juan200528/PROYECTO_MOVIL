@@ -1,20 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:showIn="navigation_view">
-
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
+
         <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="@string/menu_home" />
+            android:id="@+id/nav_buscar"
+            android:icon="@drawable/ic_search"
+            android:title="@string/nav_buscar" />
+
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/menu_gallery" />
+            android:id="@+id/nav_lista"
+            android:icon="@drawable/ic_list"
+            android:title="@string/nav_lista" />
+
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/menu_slideshow" />
+            android:id="@+id/nav_promocionadas"
+            android:icon="@drawable/ic_star"
+            android:title="@string/nav_promocionadas" />
+
+        <item
+            android:id="@+id/nav_notificaciones"
+            android:icon="@drawable/ic_notifications"
+            android:title="@string/nav_notificaciones" />
+
+        <item
+            android:id="@+id/nav_redes"
+            android:icon="@drawable/ic_share"
+            android:title="@string/nav_redes" />
+
+        <item
+            android:id="@+id/nav_asistencia"
+            android:icon="@drawable/ic_people"
+            android:title="@string/nav_asistencia" />
+
     </group>
 </menu>
