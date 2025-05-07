@@ -1,147 +1,146 @@
 package com.juan.movil;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 public class MenuActivity extends AppCompatActivity {
 
-    private AppBarConfiguration mAppBarConfiguration;
+    private static final String TAG = "MenuActivity";
+    private static final int PICK_IMAGE_REQUEST = 1;  // Código para seleccionar imagen
     private SharedPreferences sharedPreferences;
-    private ImageView profileImageToolbar;
-    private TextView userNameToolbar;
-    private LinearLayout profileContainer;
-    private FloatingActionButton fab;
+    private ImageView toolbarProfileImage;  // Imagen en la barra de herramientas
+    private ImageView popupProfileImage;   // Imagen en el popup
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_menu); // Asegúrate de que este layout incluye app_bar_menu
+        setContentView(R.layout.activity_menu);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("PanascOOP");
+        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        toolbarProfileImage = findViewById(R.id.profile_image_toolbar);
 
-        sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        profileImageToolbar = findViewById(R.id.profile_image_toolbar);
-        userNameToolbar = findViewById(R.id.user_name_toolbar);
-        profileContainer = findViewById(R.id.profile_container);
-        fab = findViewById(R.id.fab);
+        // Cargar imagen de perfil cuando la actividad se inicie
+        loadToolbarProfileImage();
 
-        // Cargar el nombre de usuario
-        loadUserName();
+        // Abrir la galería cuando se haga clic en la imagen de perfil
+        toolbarProfileImage.setOnClickListener(v -> openImagePicker());
 
-        // Cargar la foto de perfil si existe
-        loadProfileImage();
-
-        // Configurar el OnClickListener para mostrar el PopupMenu
-        profileContainer.setOnClickListener(v -> showPopupMenu(v));
-
-        fab.setOnClickListener(view -> Snackbar.make(view, R.string.snackbar_message, Snackbar.LENGTH_LONG)
-                .setAction(R.string.snackbar_action, null)
-                .setAnchorView(R.id.fab)
-                .show());
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_principal,
-                R.id.nav_buscar,
-                R.id.nav_lista,
-                R.id.nav_promocionadas,
-                R.id.nav_notificaciones,
-                R.id.nav_redes,
-                R.id.nav_asistencia
-        ).setOpenableLayout(drawer).build();
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_menu);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
+        // Mostrar el Popup cuando el usuario haga clic en su perfil
+        findViewById(R.id.profile_container).setOnClickListener(v -> showProfilePopup(v));
     }
 
-    private void loadUserName() {
-        String userName = sharedPreferences.getString("user_name", "Usuario");
-        userNameToolbar.setText(userName);
-    }
-
-    private void loadProfileImage() {
-        String profileImagePath = sharedPreferences.getString("profile_image_path", null);
-        if (profileImagePath != null) {
-            File profileImageFile = new File(profileImagePath);
-            if (profileImageFile.exists()) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 2; // Adjust as needed
-                profileImageToolbar.setImageBitmap(BitmapFactory.decodeFile(profileImagePath, options));
-            } else {
-                profileImageToolbar.setImageResource(R.drawable.ic_default_profile);
-                Toast.makeText(this, "Error al cargar la imagen de perfil", Toast.LENGTH_SHORT).show();
-            }
+    private void loadToolbarProfileImage() {
+        // Cargar la imagen de perfil guardada en SharedPreferences
+        String imagePath = sharedPreferences.getString("profile_image_path", null);
+        if (imagePath != null && new File(imagePath).exists()) {
+            toolbarProfileImage.setImageBitmap(BitmapFactory.decodeFile(imagePath));
         } else {
-            profileImageToolbar.setImageResource(R.drawable.ic_default_profile);
+            toolbarProfileImage.setImageResource(R.drawable.ic_person); // Imagen predeterminada
         }
     }
 
-    private void showPopupMenu(View view) {
-        PopupMenu popupMenu = new PopupMenu(this, view);
-        popupMenu.getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());
+    private void showProfilePopup(View anchorView) {
+        try {
+            LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+            View popupView = inflater.inflate(R.layout.popup_profile, null);
 
-        popupMenu.setOnMenuItemClickListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.action_profile) {
-                Toast.makeText(this, "Ir al perfil", Toast.LENGTH_SHORT).show(); // Placeholder
-                return true;
-            } else if (itemId == R.id.action_logout) {
+            TextView welcomeText = popupView.findViewById(R.id.welcomeText);
+            popupProfileImage = popupView.findViewById(R.id.profileImage);
+            TextView btnCerrarSesion = popupView.findViewById(R.id.btnCerrarSesion);
+
+            String name = sharedPreferences.getString("user_name", "Usuario");
+            welcomeText.setText("Bienvenido, " + name);
+
+            // Cargar imagen de perfil para el popup
+            loadProfileImageForPopup();
+
+            // Configurar el clic para cambiar imagen también en el popup
+            popupProfileImage.setOnClickListener(v -> openImagePicker());
+
+            final PopupWindow popupWindow = new PopupWindow(
+                    popupView,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    true
+            );
+
+            popupWindow.setElevation(10f);
+            popupWindow.showAsDropDown(anchorView, 0, 20);
+
+            btnCerrarSesion.setOnClickListener(v -> {
                 cerrarSesion();
-                return true;
-            } else {
-                return false;
+                popupWindow.dismiss();
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error al mostrar el perfil popup: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadProfileImageForPopup() {
+        // Cargar la imagen de perfil desde las preferencias compartidas
+        String imagePath = sharedPreferences.getString("profile_image_path", null);
+        if (imagePath != null && new File(imagePath).exists()) {
+            popupProfileImage.setImageBitmap(BitmapFactory.decodeFile(imagePath));
+        } else {
+            popupProfileImage.setImageResource(R.drawable.ic_person);
+        }
+    }
+
+    private void openImagePicker() {
+        // Abrir la galería para que el usuario elija una imagen
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            try {
+                // Obtener el InputStream de la URI de la imagen seleccionada
+                InputStream inputStream = getContentResolver().openInputStream(imageUri);
+                Bitmap selectedImage = BitmapFactory.decodeStream(inputStream);
+
+                // Actualizar ambas imágenes
+                toolbarProfileImage.setImageBitmap(selectedImage);
+                if (popupProfileImage != null) {
+                    popupProfileImage.setImageBitmap(selectedImage);
+                }
+
+                // Guardar la URI de la imagen seleccionada en SharedPreferences
+                sharedPreferences.edit().putString("profile_image_path", imageUri.toString()).apply();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
             }
-        });
-        popupMenu.show();
+        }
     }
 
     private void cerrarSesion() {
         sharedPreferences.edit().clear().apply();
-        //  Intent intent = new Intent(this, LoginActivity.class); // Reemplaza LoginActivity con tu actividad de inicio de sesión
-        //  startActivity(intent);
-        finish();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Infla el menú genérico (puede que quieras quitarlo o adaptarlo)
-        // getMenuInflater().inflate(R.menu.menu, menu);
-        return false; // Deshabilitar el menú de opciones de la Toolbar
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_menu);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
+        finish(); // Cerrar la actividad actual (cerrar sesión)
     }
 }
