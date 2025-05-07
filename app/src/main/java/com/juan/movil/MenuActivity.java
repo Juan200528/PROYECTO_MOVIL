@@ -132,7 +132,7 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Infla el menú genérico (puede que quieras quitarlo o adaptarlo)
         // getMenuInflater().inflate(R.menu.menu, menu);
         return false; // Deshabilitar el menú de opciones de la Toolbar

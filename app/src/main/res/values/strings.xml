@@ -27,8 +27,10 @@
     <string name="nav_header_title">Nombre del Usuario</string>
     <string name="nav_header_subtitle">correo@ejemplo.com</string>
 
-
     <string name="profile_image">Imagen de perfil</string>
+
+
+
     <string name="nombre_de_usuario">Nombre de Usuario</string>
     <string name="perfil">Perfil</string>
     <string name="cerrar_sesion">Cerrar Sesión</string>

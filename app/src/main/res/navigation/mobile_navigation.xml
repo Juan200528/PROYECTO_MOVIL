@@ -8,6 +8,6 @@
         android:id="@+id/nav_principal"
         android:name="com.juan.movil.ui.principal.PrincipalFragment"
         android:label="Principal"
-        tools:layout="@layout/fragment_principal" />
+        tools:layout="@layout/activity_principal_fragment" />
 
 </navigation>
