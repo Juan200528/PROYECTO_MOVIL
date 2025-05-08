@@ -19,16 +19,18 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class MenuActivity extends AppCompatActivity {
 
     private static final String TAG = "MenuActivity";
-    private static final int PICK_IMAGE_REQUEST = 1;  // Código para seleccionar imagen
+    private static final int PICK_IMAGE_REQUEST = 1;
     private SharedPreferences sharedPreferences;
-    private ImageView toolbarProfileImage;  // Imagen en la barra de herramientas
-    private ImageView popupProfileImage;   // Imagen en el popup
+    private ImageView toolbarProfileImage;
+    private ImageView popupProfileImage;
+    private String currentProfileImagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,24 +40,32 @@ public class MenuActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         toolbarProfileImage = findViewById(R.id.profile_image_toolbar);
 
-        // Cargar imagen de perfil cuando la actividad se inicie
-        loadToolbarProfileImage();
+        // Cargar la ruta de la imagen actual
+        currentProfileImagePath = sharedPreferences.getString("profile_image_path", null);
 
-        // Abrir la galería cuando se haga clic en la imagen de perfil
+        // Cargar imagen de perfil
+        loadProfileImage(toolbarProfileImage);
+
         toolbarProfileImage.setOnClickListener(v -> openImagePicker());
-
-        // Mostrar el Popup cuando el usuario haga clic en su perfil
         findViewById(R.id.profile_container).setOnClickListener(v -> showProfilePopup(v));
     }
 
-    private void loadToolbarProfileImage() {
-        // Cargar la imagen de perfil guardada en SharedPreferences
-        String imagePath = sharedPreferences.getString("profile_image_path", null);
-        if (imagePath != null && new File(imagePath).exists()) {
-            toolbarProfileImage.setImageBitmap(BitmapFactory.decodeFile(imagePath));
+    private void loadProfileImage(ImageView imageView) {
+        if (currentProfileImagePath != null && new File(currentProfileImagePath).exists()) {
+            try {
+                Bitmap bitmap = BitmapFactory.decodeFile(currentProfileImagePath);
+                imageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading profile image: " + e.getMessage());
+                setDefaultImage(imageView);
+            }
         } else {
-            toolbarProfileImage.setImageResource(R.drawable.ic_person); // Imagen predeterminada
+            setDefaultImage(imageView);
         }
+    }
+
+    private void setDefaultImage(ImageView imageView) {
+        imageView.setImageResource(R.drawable.ic_person);
     }
 
     private void showProfilePopup(View anchorView) {
@@ -70,13 +80,13 @@ public class MenuActivity extends AppCompatActivity {
             String name = sharedPreferences.getString("user_name", "Usuario");
             welcomeText.setText("Bienvenido, " + name);
 
-            // Cargar imagen de perfil para el popup
-            loadProfileImageForPopup();
+            // Cargar la misma imagen en el popup
+            loadProfileImage(popupProfileImage);
 
-            // Configurar el clic para cambiar imagen también en el popup
+            // Permitir cambiar la imagen desde el popup también
             popupProfileImage.setOnClickListener(v -> openImagePicker());
 
-            final PopupWindow popupWindow = new PopupWindow(
+            PopupWindow popupWindow = new PopupWindow(
                     popupView,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -92,23 +102,11 @@ public class MenuActivity extends AppCompatActivity {
             });
 
         } catch (Exception e) {
-            Log.e(TAG, "Error al mostrar el perfil popup: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void loadProfileImageForPopup() {
-        // Cargar la imagen de perfil desde las preferencias compartidas
-        String imagePath = sharedPreferences.getString("profile_image_path", null);
-        if (imagePath != null && new File(imagePath).exists()) {
-            popupProfileImage.setImageBitmap(BitmapFactory.decodeFile(imagePath));
-        } else {
-            popupProfileImage.setImageResource(R.drawable.ic_person);
+            Log.e(TAG, "Error showing profile popup: " + e.getMessage());
         }
     }
 
     private void openImagePicker() {
-        // Abrir la galería para que el usuario elija una imagen
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
@@ -119,28 +117,70 @@ public class MenuActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             Uri imageUri = data.getData();
-            try {
-                // Obtener el InputStream de la URI de la imagen seleccionada
-                InputStream inputStream = getContentResolver().openInputStream(imageUri);
-                Bitmap selectedImage = BitmapFactory.decodeStream(inputStream);
+            if (imageUri != null) {
+                try {
+                    // Guardar la imagen en almacenamiento interno
+                    String newImagePath = saveImageToInternalStorage(imageUri);
 
-                // Actualizar ambas imágenes
-                toolbarProfileImage.setImageBitmap(selectedImage);
-                if (popupProfileImage != null) {
-                    popupProfileImage.setImageBitmap(selectedImage);
+                    if (newImagePath != null) {
+                        // Actualizar la ruta actual
+                        currentProfileImagePath = newImagePath;
+
+                        // Guardar en preferencias
+                        sharedPreferences.edit()
+                                .putString("profile_image_path", newImagePath)
+                                .apply();
+
+                        // Actualizar todas las vistas
+                        updateAllProfileImages();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(this, "Error al guardar la imagen", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error saving image: " + e.getMessage());
                 }
+            }
+        }
+    }
 
-                // Guardar la URI de la imagen seleccionada en SharedPreferences
-                sharedPreferences.edit().putString("profile_image_path", imageUri.toString()).apply();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
+    private String saveImageToInternalStorage(Uri imageUri) throws IOException {
+        InputStream inputStream = getContentResolver().openInputStream(imageUri);
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+        // Crear directorio si no existe
+        File directory = new File(getFilesDir(), "profile_images");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        // Crear archivo
+        File file = new File(directory, "user_profile.jpg");
+
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+            return file.getAbsolutePath();
+        }
+    }
+
+    private void updateAllProfileImages() {
+        if (currentProfileImagePath != null) {
+            // Actualizar imagen en la barra de herramientas
+            loadProfileImage(toolbarProfileImage);
+
+            // Actualizar imagen en el popup si está visible
+            if (popupProfileImage != null) {
+                loadProfileImage(popupProfileImage);
             }
         }
     }
 
     private void cerrarSesion() {
         sharedPreferences.edit().clear().apply();
-        finish(); // Cerrar la actividad actual (cerrar sesión)
+
+        // Opcional: eliminar la imagen guardada al cerrar sesión
+        if (currentProfileImagePath != null) {
+            new File(currentProfileImagePath).delete();
+        }
+
+        finish();
     }
 }
