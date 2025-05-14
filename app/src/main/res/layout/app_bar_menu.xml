@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -14,53 +15,45 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@drawable/side_nav_bar">
+            android:layout_height="59dp"
+            android:background="@drawable/side_nav_bar"
+            android:gravity="start|center_vertical">
 
             <LinearLayout
-                android:id="@+id/profile_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
                 android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
+                android:layout_marginBottom="16dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/profile_image_toolbar"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
                     android:contentDescription="@string/profile_image"
+                    android:focusable="true"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_person" />
+                    android:src="@drawable/ic_persona" />
 
                 <TextView
                     android:id="@+id/user_name_toolbar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:text="@string/nombre_de_usuario"
                     android:textAppearance="?attr/textAppearanceSubtitle1" />
             </LinearLayout>
-
         </androidx.appcompat.widget.Toolbar>
-
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_menu" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
-
+    <include layout="@layout/content_menu"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

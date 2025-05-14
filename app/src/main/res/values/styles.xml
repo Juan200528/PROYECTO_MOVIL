@@ -23,4 +23,22 @@
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/black</item>
     </style>
+
+
+        <!-- Definir un estilo para los bordes redondeados -->
+    <style name="CircleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+
+    <style name="PopupTheme" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+
+
+
 </resources>
