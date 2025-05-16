@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permiso para acceder a Internet -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,23 +16,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MovilFinal"
         tools:targetApi="31">
-        <activity
-            android:name=".Register"
-            android:exported="false" />
-        <activity
-            android:name=".Inicio_Sesion"
-            android:exported="false"
-            android:theme="@style/Theme.MovilFinal" />
 
+        <!-- Pantalla principal (inicio de la app) -->
         <activity
             android:name=".PantallaPrincipal"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Pantalla de inicio de sesión -->
+        <activity
+            android:name=".InicioSesion"
+            android:exported="false"
+            android:theme="@style/Theme.MovilFinal" />
+
+        <!-- Pantalla de registro -->
+        <activity
+            android:name=".Registro"
+            android:exported="false" />
+
     </application>
 
 </manifest>

@@ -7,25 +7,28 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    android:background="#FFFFFF"
-    tools:context=".MainActivity">
+    android:background="@color/colorB"
+    tools:context=".PantallaPrincipal">
 
     <!-- Logo -->
     <ImageView
-        android:layout_width="200dp"
+        android:layout_width="300dp"
         android:layout_height="200dp"
         android:src="@drawable/logoprincipal"
-        android:layout_marginBottom="16dp"/>
+        android:id="@+id/logo1"
+        android:layout_marginBottom="20dp"/>
 
     <!-- Título -->
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/PanasCoop"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="PANASCOOP"
-        android:textSize="24sp"
-        android:textColor="#000000"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
+        android:textSize="48sp"
+        android:textColor="@color/tituloV"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
 
     <!-- Subtítulo -->
     <TextView
@@ -33,30 +36,32 @@
         android:layout_height="wrap_content"
         android:text="Bienvenido a Panascoop, tu plataforma confiable para gestionar y conectar con tu cooperativa."
         android:textSize="16sp"
-        android:textColor="#666666"
+        android:textColor="@color/mensajes"
         android:layout_marginBottom="48dp"
         android:gravity="center"
         android:layout_gravity="center"
         android:maxWidth="300dp"/>
 
     <!-- Botón de Registrar -->
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnRegister"
         android:layout_width="225dp"
-        android:layout_height="50dp"
+        android:layout_height="42dp"
         android:text="Registrar"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#03683E"
+        android:textAllCaps="false"
+        android:textStyle="normal"
         android:layout_marginBottom="16dp"/>
 
-    <!-- Botón de Iniciar Sesión con borde (corregido: solo primera letra en mayúscula) -->
+    <!-- Botón de Iniciar Sesión con borde -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnLogin"
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
         android:layout_width="225dp"
-        android:layout_height="50dp"
-        android:background="@drawable/button_border"
+        android:layout_height="42dp"
         android:text="Iniciar sesión"
         android:textAllCaps="false"
-        android:textColor="#166534" />
+        android:textColor="@color/tituloV"
+        android:background="@drawable/button_border"
+        style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+
 </LinearLayout>
