@@ -1,18 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Movil" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!--  Base application theme.  -->
+    <style name="Base.Theme.MovilFigma" parent="Theme.Material3.DayNight.NoActionBar">
+        <!--  Customize your light theme here.  -->
+        <!--  <item name="colorPrimary">@color/my_light_primary</item>  -->
     </style>
-
-    <style name="Theme.Movil" parent="Base.Theme.Movil" />
-
-    <style name="Theme.Movil.NoActionBar">
+    <style name="Theme.MovilFigma" parent="Base.Theme.MovilFigma"/>
+    <style name="Theme.MovilFigma.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-
-    <style name="Theme.Movil.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.Movil.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.MovilFigma.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="Theme.MovilFigma.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <!--  Base application theme.  -->
+    <style name="Theme.MovilFigma.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/principalhd</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
 </resources>

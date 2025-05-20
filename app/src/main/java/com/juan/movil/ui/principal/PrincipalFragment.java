@@ -13,7 +13,7 @@ public class PrincipalFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.activity_principal_fragment, container, false);
+        View root = inflater.inflate(R.layout.fragment_principal, container, false);
 
         // Aquí puedes obtener referencias a tus Views (Button, TextView, etc.)
         // utilizando root.findViewById(R.id.button_create_activity);

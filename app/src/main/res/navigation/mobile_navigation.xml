@@ -1,14 +1,3 @@
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mobile_navigation"
-    app:startDestination="@id/nav_principal">
-
-
-    <fragment
-        android:id="@+id/nav_principal"
-        android:name="com.juan.movil.ui.principal.PrincipalFragment"
-        android:label="Principal"
-        tools:layout="@layout/activity_principal_fragment" />
-
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/mobile_navigation" app:startDestination="@+id/nav_principal">
+    <fragment android:id="@+id/nav_principal" android:name="com.juan.movil.ui.principal.PrincipalFragment" android:label="PanascOOP" tools:layout="@layout/fragment_principal"/>
 </navigation>
