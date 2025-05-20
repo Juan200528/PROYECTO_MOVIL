@@ -1,0 +1,15 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" tools:context=".MenuActivity">
+    <com.google.android.material.appbar.AppBarLayout android:id="@+id/appBarLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/side_nav_bar">
+        <androidx.appcompat.widget.Toolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="60dp" android:background="@drawable/side_nav_bar" android:gravity="start|center_vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_vertical" android:orientation="horizontal">
+                <!--  Título PanascOOP  -->
+                <TextView android:id="@+id/content_title" android:layout_width="241dp" android:layout_height="match_parent" android:layout_gravity="center" android:gravity="start|center" android:text="PanascOOP" android:textColor="#808080" android:textSize="20sp" android:textStyle="bold"/>
+                <!--  Contenedor del usuario  -->
+                <LinearLayout android:id="@+id/profile_container" android:layout_width="wrap_content" android:layout_height="match_parent" android:orientation="horizontal" android:gravity="center" android:clickable="true">
+                    <com.google.android.material.imageview.ShapeableImageView android:id="@+id/profile_image_toolbar" android:layout_width="35dp" android:layout_height="35dp" android:scaleType="centerCrop" android:src="@drawable/ic_persona" android:clickable="true"/>
+                    <TextView android:id="@+id/user_name_toolbar" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_marginStart="12dp" android:gravity="center" android:text="Usuario" android:textColor="@android:color/white" android:textSize="18sp" android:visibility="visible"/>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

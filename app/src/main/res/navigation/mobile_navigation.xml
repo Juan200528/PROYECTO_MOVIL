@@ -1,0 +1,9 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/mobile_navigation" app:startDestination="@+id/nav_principal">
+    <fragment android:id="@+id/nav_principal" android:name="com.juan.movil.ui.principal.PrincipalFragment" android:label="PanascOOP" tools:layout="@layout/fragment_principal"/>
+    <fragment android:id="@+id/nav_buscar" android:name="com.juan.movil.ui.buscar.BuscarFragment" android:label="Buscar y Filtrar" tools:layout="@layout/fragment_buscar"/>
+    <fragment android:id="@+id/nav_lista" android:name="com.example.movil_figma.ui.lista.ListaFragment" android:label="Lista Actividades" tools:layout="@layout/fragment_lista"/>
+    <fragment android:id="@+id/nav_promocionadas" android:name="com.example.movil_figma.ui.promocionadas.PromocionadasFragment" android:label="Actividades Promocionadas" tools:layout="@layout/fragment_promocionadas"/>
+    <fragment android:id="@+id/nav_notificaciones" android:name="com.example.movil_figma.ui.configuracion.ConfiguracionFragment" android:label="Configuración Notificaciones" tools:layout="@layout/fragment_configuracion"/>
+    <fragment android:id="@+id/nav_redes" android:name="com.example.movil_figma.ui.compartir.CompartirFragment" android:label="Compartir en Redes" tools:layout="@layout/fragment_compartir"/>
+    <fragment android:id="@+id/nav_asistencia" android:name="com.example.movil_figma.ui.gestionar.GestionarFragment" android:label="Gestionar Asistentes" tools:layout="@layout/fragment_gestionar"/>
+</navigation>

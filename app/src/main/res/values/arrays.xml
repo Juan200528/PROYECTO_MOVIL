@@ -1,0 +1,11 @@
+<resources>
+    <string-array name="filtros_fecha">
+        <item>Todas</item>
+        <item>Próximas</item>
+        <item>Pasadas</item>
+    </string-array>
+    <string-array name="filtros_estado">
+        <item>Todas</item>
+        <item>Promocionadas</item>
+    </string-array>
+</resources>
