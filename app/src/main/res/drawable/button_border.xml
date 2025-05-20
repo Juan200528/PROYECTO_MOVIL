@@ -3,14 +3,25 @@
     android:shape="rectangle">
 
     <!-- Fondo blanco -->
+<<<<<<< HEAD
     <solid android:color="@color/colorB" />
+=======
+    <solid android:color="#FFFFFF" />
+>>>>>>> Kevin
 
     <!-- Borde verde -->
     <stroke
         android:width="2dp"
+<<<<<<< HEAD
         android:color="@color/botonBorde" />
 
     <!-- Esquinas redondeadas -->
     <corners android:radius="20dp" />
+=======
+        android:color="#166534" />
+
+    <!-- Esquinas redondeadas -->
+    <corners android:radius="8dp" />
+>>>>>>> Kevin
 
 </shape>
