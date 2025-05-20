@@ -1,3 +1,30 @@
 <resources>
-    <string name="app_name">Movil</string>
+    <string name="app_name">Movil-Figma</string>
+    <!--   AppBar   -->
+    <string name="menu">Menú</string>
+    <string name="appname">PanascOOP</string>
+    <!--   FAB   -->
+    <string name="fab">Agregar</string>
+    <!--   Drawer Menu Items   -->
+    <string name="nav_buscar">Buscar y Filtrar</string>
+    <string name="nav_lista">Lista Actividades</string>
+    <string name="nav_promocionadas"> Actividades Promocionadas</string>
+    <string name="nav_notificaciones"> Configurar Notificaciones</string>
+    <string name="nav_redes">Compartir en Redes Sociales</string>
+    <string name="nav_asistencia">Gestionar Asistencia</string>
+    <!--   Snackbar   -->
+    <string name="snackbar_message">Acción de ejemplo</string>
+    <string name="snackbar_action">Deshacer</string>
+    <!--   Header del Navigation Drawer   -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="usuario">Usuario</string>
+    <string name="nav_header_desc">Logo de la app</string>
+    <string name="nav_header_title">Nombre del Usuario</string>
+    <string name="nav_header_subtitle">correo@ejemplo.com</string>
+    <string name="profile_image">Imagen de perfil</string>
+    <string name="nombre_de_usuario">Nombre de Usuario</string>
+    <string name="perfil">Perfil</string>
+    <string name="cerrar_sesion">Cerrar Sesión</string>
+    <string name="actividades_pasadas">Actividades Pasadas</string>
 </resources>
