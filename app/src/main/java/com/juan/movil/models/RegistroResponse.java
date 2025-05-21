@@ -1,4 +1,4 @@
-package com.juan.movil.model;
+package com.juan.movil.models;
 
 import com.google.gson.annotations.SerializedName;
 

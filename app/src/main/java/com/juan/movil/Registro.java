@@ -9,8 +9,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.juan.movil.api.ApiService;
-import com.juan.movil.model.RegistroRequest;
-import com.juan.movil.model.RegistroResponse;
+import com.juan.movil.models.RegistroRequest;
+import com.juan.movil.models.RegistroResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;

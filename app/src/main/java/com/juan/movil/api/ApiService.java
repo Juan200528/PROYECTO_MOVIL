@@ -1,10 +1,10 @@
 package com.juan.movil.api;
 
-import com.juan.movil.model.LoginRequest;
-import com.juan.movil.model.LoginResponse;
-import com.juan.movil.model.RegistroRequest;
-import com.juan.movil.model.RegistroResponse;
-import com.juan.movil.model.ListaResponse;
+import com.juan.movil.models.LoginRequest;
+import com.juan.movil.models.LoginResponse;
+import com.juan.movil.models.RegistroRequest;
+import com.juan.movil.models.RegistroResponse;
+import com.juan.movil.models.ListaResponse;
 
 import java.util.List;
 

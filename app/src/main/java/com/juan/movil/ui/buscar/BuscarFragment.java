@@ -15,10 +15,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-//import com.example.movil_figma.R;
-//import com.example.movil_figma.db.ManagerDb;
-//import com.example.movil_figma.model.Actividad;
-//import com.example.movil_figma.model.BuscarAdapter;
+import com.juan.movil.R;
+import com.juan.movil.db.ManagerDb;
+import com.juan.movil.model.Actividad;
+import com.juan.movil.model.BuscarAdapter;
 import com.juan.movil.R;
 
 import java.util.ArrayList;
