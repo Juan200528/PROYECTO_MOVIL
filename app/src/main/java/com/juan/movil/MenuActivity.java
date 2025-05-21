@@ -29,7 +29,6 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.navigation.NavigationView;
-import com.juan.movil.R;
 
 public class MenuActivity extends AppCompatActivity {
 
