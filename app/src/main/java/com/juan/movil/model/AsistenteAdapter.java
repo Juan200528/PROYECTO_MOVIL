@@ -7,7 +7,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.movil_figma.R;
+import com.juan.movil.R;
 import java.util.List;
 import java.util.function.Consumer;
 

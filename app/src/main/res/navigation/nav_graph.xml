@@ -1,8 +1,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_graph" app:startDestination="@id/nav_buscar">
     <fragment android:id="@+id/nav_buscar" android:name="com.juan.movil.ui.buscar.BuscarFragment" android:label="Buscar" tools:layout="@layout/fragment_buscar"/>
-    <fragment android:id="@+id/nav_lista" android:name="com.example.movil_figma.ui.lista.ListaFragment" android:label="Lista" tools:layout="@layout/fragment_lista"/>
-    <fragment android:id="@+id/nav_promocionadas" android:name="com.example.movil_figma.ui.promocionadas.PromocionadasFragment" android:label="Promocionadas" tools:layout="@layout/fragment_promocionadas"/>
-    <fragment android:id="@+id/nav_notificaciones" android:name="com.example.movil_figma.ui.configuracion.ConfiguracionFragment" android:label="Notificaciones" tools:layout="@layout/fragment_configuracion"/>
-    <fragment android:id="@+id/nav_redes" android:name="com.example.movil_figma.ui.compartir.CompartirFragment" android:label="Redes" tools:layout="@layout/fragment_compartir"/>
-    <fragment android:id="@+id/nav_gestionar" android:name="com.example.movil_figma.ui.gestionar.GestionarFragment" android:label="Asistencia" tools:layout="@layout/fragment_gestionar"/>
+    <fragment android:id="@+id/nav_lista" android:name="com.juan.movil.ui.lista.ListaFragment" android:label="Lista" tools:layout="@layout/fragment_lista"/>
+    <fragment android:id="@+id/nav_promocionadas" android:name="com.juan.movil.ui.promocionadas.PromocionadasFragment" android:label="Promocionadas" tools:layout="@layout/fragment_promocionadas"/>
+    <fragment android:id="@+id/nav_notificaciones" android:name="com.juan.movil.ui.configuracion.ConfiguracionFragment" android:label="Notificaciones" tools:layout="@layout/fragment_configuracion"/>
+    <fragment android:id="@+id/nav_redes" android:name="com.juan.movil.ui.compartir.CompartirFragment" android:label="Redes" tools:layout="@layout/fragment_compartir"/>
+    <fragment android:id="@+id/nav_gestionar" android:name="com.juan.movil.ui.gestionar.GestionarFragment" android:label="Asistencia" tools:layout="@layout/fragment_gestionar"/>
 </navigation>

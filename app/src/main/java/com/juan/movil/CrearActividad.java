@@ -34,8 +34,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-//import com.example.movil_figma.db.ManagerDb;
-//import com.example.movil_figma.model.Actividad;
+import com.juan.movil.db.ManagerDb;import com.juan.movil.model.Actividad;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,7 +67,7 @@ public class CrearActividad extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_crear_actividad);
+        setContentView(R.layout.crear_actividad);
 
         inicializarVistas();
         configurarBaseDatos();

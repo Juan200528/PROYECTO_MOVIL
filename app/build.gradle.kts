@@ -25,32 +25,37 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         viewBinding = true
     }
 }
 
-    dependencies {
-        implementation(libs.appcompat)
-        implementation(libs.material)
-        implementation(libs.activity)
-        implementation(libs.constraintlayout)
+dependencies {
+    implementation(libs.appcompat)
+    implementation(libs.constraintlayout)
+    implementation(libs.activity)
 
-        implementation("com.squareup.retrofit2:retrofit:2.9.0")
-        implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-        implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
-        implementation("androidx.navigation:navigation-fragment:2.9.0")
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
 
-        testImplementation(libs.junit)
-        androidTestImplementation(libs.ext.junit)
-        androidTestImplementation(libs.espresso.core)
-    }
+    implementation(libs.material)
+
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
+    implementation(libs.firebase.storage)
+
+    implementation(libs.glide)
 
 
-
-
-
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+}

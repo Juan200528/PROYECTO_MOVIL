@@ -18,8 +18,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juan.movil.R;
-//import com.example.movil_figma.model.Actividad;
-//import com.example.movil_figma.model.PromocionadaAdapter;
+import com.juan.movil.model.Actividad;
+import com.juan.movil.model.PromocionadaAdapter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class PromocionadasFragment extends Fragment implements PromocionadaAdapt
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_promocionadas, container, false);
+        View root = inflater.inflate(R.layout.fragment_promocionada, container, false);
 
         // Inicializar vistas
         recyclerPromocionadas = root.findViewById(R.id.recyclerPromocionadas);

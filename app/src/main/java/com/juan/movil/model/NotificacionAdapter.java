@@ -6,8 +6,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.movil_figma.R;
-import com.example.movil_figma.db.ManagerDb;
+import com.juan.movil.R;
+import com.juan.movil.db.ManagerDb;
 import java.util.List;
 
 public class NotificacionAdapter extends RecyclerView.Adapter<NotificacionAdapter.NotificacionViewHolder> {
