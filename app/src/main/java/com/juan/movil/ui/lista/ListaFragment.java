@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.juan.movil.R;
-import com.juan.movil.model.ListaResponse;
+import com.juan.movil.models.ListaResponse;
 
 import java.util.ArrayList;
 import java.util.List;

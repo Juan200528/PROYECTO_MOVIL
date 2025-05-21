@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.juan.movil.api.ApiService;
-import com.juan.movil.model.ListaResponse;
+import com.juan.movil.models.ListaResponse;
 
 import java.util.List;
 
