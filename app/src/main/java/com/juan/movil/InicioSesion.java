@@ -20,8 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.juan.movil.api.ApiService;
-import com.juan.movil.model.LoginRequest;
-import com.juan.movil.model.LoginResponse;
+import com.juan.movil.models.LoginRequest;
+import com.juan.movil.models.LoginResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;

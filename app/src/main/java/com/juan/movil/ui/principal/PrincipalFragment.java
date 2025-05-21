@@ -22,11 +22,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-//import com.example.movil_figma.CrearActividad;
-//import com.example.movil_figma.R;
-//import com.example.movil_figma.model.Actividad;
-//import com.example.movil_figma.model.ActividadAdapter;
-//import com.example.movil_figma.db.ManagerDb;
+import com.juan.movil.CrearActividad;
+import com.juan.movil.R;
+import com.juan.movil.model.Actividad;
+import com.juan.movil.model.ActividadAdapter;
+import com.juan.movil.db.ManagerDb;
 import com.juan.movil.R;
 
 import java.io.File;

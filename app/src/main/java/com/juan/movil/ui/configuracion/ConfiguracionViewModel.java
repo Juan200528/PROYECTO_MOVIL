@@ -4,8 +4,8 @@ import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-//import com.example.movil_figma.db.ManagerDb;
-//import com.example.movil_figma.model.Notificacion;
+import com.juan.movil.db.ManagerDb;
+import com.juan.movil.model.Notificacion;
 import java.util.List;
 
 public class ConfiguracionViewModel extends AndroidViewModel {
