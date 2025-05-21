@@ -1,12 +1,14 @@
 package com.juan.movil;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
@@ -19,6 +21,19 @@ public class PantallaPrincipal extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Validar si ya hay sesión activa
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String nombre = sharedPreferences.getString("user_name", null);
+        if (nombre != null) {
+            // Usuario ya logueado, redirigir a MenuActivity
+            Intent intent = new Intent(PantallaPrincipal.this, MenuActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_pantalla_principal);
 
         // Título
@@ -38,7 +53,7 @@ public class PantallaPrincipal extends AppCompatActivity {
         // Crear GradientDrawable para el estado normal (degradado)
         GradientDrawable gradientDrawableNormal = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[] { Color.parseColor("#03683E"), Color.parseColor("#064349") });
+                new int[]{Color.parseColor("#03683E"), Color.parseColor("#064349")});
         gradientDrawableNormal.setCornerRadius(80f);
 
         // Crear GradientDrawable para el estado presionado (color sólido)
@@ -48,8 +63,8 @@ public class PantallaPrincipal extends AppCompatActivity {
 
         // Configurar StateListDrawable para los estados del botón
         StateListDrawable stateListDrawable = new StateListDrawable();
-        stateListDrawable.addState(new int[] { android.R.attr.state_pressed }, gradientDrawablePressed);
-        stateListDrawable.addState(new int[] {}, gradientDrawableNormal);
+        stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, gradientDrawablePressed);
+        stateListDrawable.addState(new int[]{}, gradientDrawableNormal);
 
         // Aplicar el StateListDrawable al botón de Registrar
         btnRegister.setBackground(stateListDrawable);

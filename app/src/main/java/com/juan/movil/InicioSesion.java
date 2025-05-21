@@ -165,6 +165,7 @@ public class InicioSesion extends AppCompatActivity {
     }
 
     private void guardarCredenciales(String token, String nombre) {
+        // ✅ Usamos la instancia ya inicializada en onCreate()
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("token", token);
         editor.putString("user_name", nombre != null ? nombre : "Usuario");
