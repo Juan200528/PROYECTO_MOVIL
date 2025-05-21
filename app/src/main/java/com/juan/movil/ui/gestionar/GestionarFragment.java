@@ -17,10 +17,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juan.movil.R;
-//import com.example.movil_figma.model.Actividad;
-//import com.example.movil_figma.model.Asistente;
-//import com.example.movil_figma.model.AsistenteAdapter;
-//import com.example.movil_figma.db.ManagerDb;
+import com.juan.movil.model.Actividad;
+import com.juan.movil.model.Asistente;
+import com.juan.movil.model.AsistenteAdapter;
+import com.juan.movil.db.ManagerDb;
 import java.util.ArrayList;
 import java.util.List;
 
