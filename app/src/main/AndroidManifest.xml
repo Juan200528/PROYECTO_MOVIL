@@ -16,45 +16,28 @@
         android:theme="@style/Theme.Movil"
         tools:targetApi="31">
 
-        <!-- Actividad principal al iniciar la app -->
-        <activity
-            android:name=".SplashActivity"
+        <!--  Actividad principal al iniciar la app  -->
+        <activity android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.Movil.Splash">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <!-- Pantalla de login -->
-        <activity
-            android:name=".InicioSesion"
-            android:exported="false" />
-
-        <!-- Pantalla de bienvenida -->
-        <activity
-            android:name=".PantallaPrincipal"
-            android:exported="false" />
-
-        <!-- Menú principal -->
-        <activity
-            android:name=".MenuActivity"
+        <!--  Pantalla de login  -->
+        <activity android:name=".InicioSesion" android:exported="false"/>
+        <!--  Pantalla de bienvenida  -->
+        <activity android:name=".PantallaPrincipal" android:exported="false"/>
+        <!--  Menú principal  -->
+        <activity android:name=".MenuActivity"
             android:exported="false"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Movil.NoActionBar" />
-
-        <!-- Otras pantallas -->
-        <activity
-            android:name=".CrearActividad"
-            android:exported="false" />
-        <activity
-            android:name=".Registro"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+            android:theme="@style/Theme.Movil.NoActionBar"/>
+        <!--  Otras pantallas  -->
+        <activity android:name=".CrearActividad" android:exported="false"/>
+        <activity android:name=".Registro" android:exported="false"/>
+        <activity android:name=".MainActivity" android:exported="false"/>
     </application>
 </manifest>
-
-
