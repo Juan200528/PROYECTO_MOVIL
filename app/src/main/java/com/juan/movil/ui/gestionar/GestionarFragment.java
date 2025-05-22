@@ -1,5 +1,6 @@
 package com.juan.movil.ui.gestionar;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,10 +18,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juan.movil.R;
-//import com.example.movil_figma.model.Actividad;
-//import com.example.movil_figma.model.Asistente;
-//import com.example.movil_figma.model.AsistenteAdapter;
-//import com.example.movil_figma.db.ManagerDb;
+import com.juan.movil.model.Actividad;
+import com.juan.movil.model.Asistente;
+import com.juan.movil.model.AsistenteAdapter;
+import com.juan.movil.db.ManagerDb;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class GestionarFragment extends Fragment {
     private TextView tvTituloActividad, tvEmptyGestion;
     private int userId;
 
+    @SuppressLint("NewApi")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_gestionar, container, false);
