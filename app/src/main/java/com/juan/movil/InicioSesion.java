@@ -8,35 +8,24 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
-
-import com.juan.movil.api.ApiService;
-import com.juan.movil.models.LoginRequest;
-import com.juan.movil.models.LoginResponse;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import com.juan.movil.db.ManagerDb;
 
 public class InicioSesion extends AppCompatActivity {
 
-    EditText etCorreo, etContrasena;
-    AppCompatButton btnIniciarSesion;
-    TextView tvRegistro;
-
-    ApiService apiService;
-    SharedPreferences sharedPreferences;
+    private EditText etCorreo, etContrasena;
+    private Button btnIniciarSesion;
+    private TextView tvRegistro;
+    private ManagerDb managerDb;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,26 +37,17 @@ public class InicioSesion extends AppCompatActivity {
         btnIniciarSesion = findViewById(R.id.btnIniciarSesion);
         tvRegistro = findViewById(R.id.tvRegistro);
 
-        // Configurar botón con estilo
-        configurarBotonIniciarSesion();
+        managerDb = new ManagerDb(this);
+        managerDb.open();
 
-        // Texto "¿No tienes una cuenta? Regístrate" con estilos y acción
+        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+
+        configurarBotonIniciarSesion();
         configurarTextoRegistrate();
 
-        // Retrofit y API
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://backend-nrpu.onrender.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        apiService = retrofit.create(ApiService.class);
-
-        // SharedPreferences
-        sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-
-        // Listener del botón
         btnIniciarSesion.setOnClickListener(v -> iniciarSesion());
 
-        // Rellenar correo si viene desde Registro
+        // Si viene un email de registro previo, ponerlo en el campo correo
         String emailRegistrado = getIntent().getStringExtra("email_registrado");
         if (emailRegistrado != null) {
             etCorreo.setText(emailRegistrado);
@@ -77,98 +57,97 @@ public class InicioSesion extends AppCompatActivity {
     private void configurarBotonIniciarSesion() {
         btnIniciarSesion.setBackground(null);
 
-        GradientDrawable normal = new GradientDrawable(
+        GradientDrawable gradientDrawableNormal = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
                 new int[]{Color.parseColor("#03683E"), Color.parseColor("#064349")});
-        normal.setCornerRadius(80f);
+        gradientDrawableNormal.setCornerRadius(80f);
 
-        GradientDrawable pressed = new GradientDrawable();
-        pressed.setColor(Color.parseColor("#063449"));
-        pressed.setCornerRadius(80f);
+        GradientDrawable gradientDrawablePressed = new GradientDrawable();
+        gradientDrawablePressed.setColor(Color.parseColor("#063449"));
+        gradientDrawablePressed.setCornerRadius(80f);
 
-        StateListDrawable states = new StateListDrawable();
-        states.addState(new int[]{android.R.attr.state_pressed}, pressed);
-        states.addState(new int[]{}, normal);
+        StateListDrawable stateListDrawable = new StateListDrawable();
+        stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, gradientDrawablePressed);
+        stateListDrawable.addState(new int[]{}, gradientDrawableNormal);
 
-        btnIniciarSesion.setBackground(states);
+        btnIniciarSesion.setBackground(stateListDrawable);
     }
 
     private void configurarTextoRegistrate() {
-        String textoCompleto = "¿No tienes una cuenta? Registrate";
-        SpannableString spannable = new SpannableString(textoCompleto);
+        String fullText = "¿No tienes una cuenta? Registrate";
+        SpannableString spannableString = new SpannableString(fullText);
 
-        // Color del texto fijo
-        spannable.setSpan(new ForegroundColorSpan(Color.parseColor("#064349")),
-                0, 22, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(
+                new ForegroundColorSpan(Color.parseColor("#064349")),
+                0, 22,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
 
-        // Color del texto clickeable
-        spannable.setSpan(new ForegroundColorSpan(Color.parseColor("#39B1E0")),
-                22, textoCompleto.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(
+                new ForegroundColorSpan(Color.parseColor("#39B1E0")),
+                22, fullText.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
 
-        // Acción clickeable
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-                startActivity(new Intent(InicioSesion.this, Registro.class));
+                Intent intent = new Intent(InicioSesion.this, Registro.class);
+                startActivity(intent);
                 finish();
             }
 
             @Override
-            public void updateDrawState(TextPaint ds) {
+            public void updateDrawState(android.text.TextPaint ds) {
                 super.updateDrawState(ds);
-                ds.setUnderlineText(false);
                 ds.setColor(Color.parseColor("#39B1E0"));
+                ds.setUnderlineText(false);
             }
         };
 
-        spannable.setSpan(clickableSpan, 22, textoCompleto.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(
+                clickableSpan,
+                22, fullText.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
 
-        tvRegistro.setText(spannable);
+        tvRegistro.setText(spannableString);
         tvRegistro.setMovementMethod(LinkMovementMethod.getInstance());
         tvRegistro.setHighlightColor(Color.TRANSPARENT);
     }
 
     private void iniciarSesion() {
         String email = etCorreo.getText().toString().trim();
-        String password = etContrasena.getText().toString();
+        String password = etContrasena.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        LoginRequest request = new LoginRequest(email, password);
+        int userId = managerDb.validarUsuario(email, password);
+        if (userId != -1) {
+            String nombreCompleto = managerDb.getUserNameById(userId);
 
-        apiService.loginUsuario(request).enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String token = response.body().getToken();
-                    String nombre = response.body().getNombre(); // Asegúrate de que el backend lo envíe
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("user_id", userId);
+            editor.putString("user_email", email);
+            editor.putString("user_name", (nombreCompleto != null && !nombreCompleto.trim().isEmpty()) ? nombreCompleto : "Usuario");
+            editor.apply();
 
-                    guardarCredenciales(token, nombre);
-                    Toast.makeText(InicioSesion.this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
-
-                    Intent intent = new Intent(InicioSesion.this, MenuActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Toast.makeText(InicioSesion.this, "Credenciales incorrectas", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Toast.makeText(InicioSesion.this, "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+            Intent intent = new Intent(this, com.juan.movil.MenuActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(this, "Correo electrónico o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private void guardarCredenciales(String token, String nombre) {
-        // ✅ Usamos la instancia ya inicializada en onCreate()
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("token", token);
-        editor.putString("user_name", nombre != null ? nombre : "Usuario");
-        editor.apply();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (managerDb != null) {
+            managerDb.close();
+        }
     }
 }
