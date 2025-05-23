@@ -1,7 +1,6 @@
 package com.juan.movil.ui.promocionadas;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,8 +17,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juan.movil.R;
-import com.juan.movil.model.Actividad;
-import com.juan.movil.model.PromocionadaAdapter;
+import com.juan.movil.models.Actividad;
+import com.juan.movil.models.PromocionadaAdapter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

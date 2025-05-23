@@ -17,9 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juan.movil.R;
 import com.juan.movil.db.ManagerDb;
-import com.juan.movil.model.Actividad;
-import com.juan.movil.model.BuscarAdapter;
-import com.juan.movil.R;
+import com.juan.movil.models.Actividad;
+import com.juan.movil.models.BuscarAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

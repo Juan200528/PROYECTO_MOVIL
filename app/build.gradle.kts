@@ -37,25 +37,32 @@ android {
 }
 
 dependencies {
+    // AndroidX y UI
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.activity)
 
+    // Navegación
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
 
+    // Material Design
     implementation(libs.material)
 
+    // Retrofit para llamadas HTTP
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-    implementation(libs.logging.interceptor)
+    implementation(libs.logging.interceptor) // Interceptor para logs de Retrofit
 
+    // Firebase Storage
     implementation(libs.firebase.storage)
 
+    // Glide para carga de imágenes
     implementation(libs.glide)
 
-
+    // Pruebas
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
+

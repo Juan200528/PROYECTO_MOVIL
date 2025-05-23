@@ -1,4 +1,4 @@
-package com.juan.movil.model;
+package com.juan.movil.models;
 
 public class Notificacion {
     private int id;

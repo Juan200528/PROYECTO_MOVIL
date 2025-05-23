@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.juan.movil.db.ManagerDb;
-import com.juan.movil.model.Asistente;
+import com.juan.movil.models.Asistente;
 import java.util.List;
 
 public class GestionarViewModel extends AndroidViewModel {

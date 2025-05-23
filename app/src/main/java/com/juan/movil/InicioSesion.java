@@ -135,7 +135,7 @@ public class InicioSesion extends AppCompatActivity {
             editor.putString("user_name", (nombreCompleto != null && !nombreCompleto.trim().isEmpty()) ? nombreCompleto : "Usuario");
             editor.apply();
 
-            Intent intent = new Intent(this, com.juan.movil.MenuActivity.class);
+            Intent intent = new Intent(this, MenuActivity.class);
             startActivity(intent);
             finish();
         } else {

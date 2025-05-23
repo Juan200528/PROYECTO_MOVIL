@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.juan.movil.db.ManagerDb;
-import com.juan.movil.model.Notificacion;
+import com.juan.movil.models.Notificacion;
 import java.util.List;
 
 public class ConfiguracionViewModel extends AndroidViewModel {
