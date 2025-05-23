@@ -8,23 +8,35 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
-import com.juan.movil.db.ManagerDb;
+import androidx.appcompat.widget.AppCompatButton;
+
+import com.juan.movil.api.ApiService;
+import com.juan.movil.model.LoginRequest;
+import com.juan.movil.model.LoginResponse;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class InicioSesion extends AppCompatActivity {
 
     private EditText etCorreo, etContrasena;
-    private Button btnIniciarSesion;
+    private AppCompatButton btnIniciarSesion;
     private TextView tvRegistro;
-    private ManagerDb managerDb;
+
+    private ApiService apiService;
     private SharedPreferences sharedPreferences;
 
     @Override
@@ -37,13 +49,17 @@ public class InicioSesion extends AppCompatActivity {
         btnIniciarSesion = findViewById(R.id.btnIniciarSesion);
         tvRegistro = findViewById(R.id.tvRegistro);
 
-        managerDb = new ManagerDb(this);
-        managerDb.open();
-
-        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-
         configurarBotonIniciarSesion();
         configurarTextoRegistrate();
+
+        // Inicializar Retrofit para el API
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://backend-nrpu.onrender.com/") // URL base del backend
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiService = retrofit.create(ApiService.class);
+
+        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
 
         btnIniciarSesion.setOnClickListener(v -> iniciarSesion());
 
@@ -98,7 +114,7 @@ public class InicioSesion extends AppCompatActivity {
             }
 
             @Override
-            public void updateDrawState(android.text.TextPaint ds) {
+            public void updateDrawState(TextPaint ds) {
                 super.updateDrawState(ds);
                 ds.setColor(Color.parseColor("#39B1E0"));
                 ds.setUnderlineText(false);
@@ -125,29 +141,38 @@ public class InicioSesion extends AppCompatActivity {
             return;
         }
 
-        int userId = managerDb.validarUsuario(email, password);
-        if (userId != -1) {
-            String nombreCompleto = managerDb.getUserNameById(userId);
+        LoginRequest request = new LoginRequest(email, password);
 
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt("user_id", userId);
-            editor.putString("user_email", email);
-            editor.putString("user_name", (nombreCompleto != null && !nombreCompleto.trim().isEmpty()) ? nombreCompleto : "Usuario");
-            editor.apply();
+        apiService.loginUsuario(request).enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String token = response.body().getToken();
+                    String nombre = response.body().getNombre(); // Debe venir del backend
 
-            Intent intent = new Intent(this, MenuActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Toast.makeText(this, "Correo electrónico o contraseña incorrectos", Toast.LENGTH_SHORT).show();
-        }
+                    guardarCredenciales(token, nombre);
+                    Toast.makeText(InicioSesion.this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
+
+                    // Cambiar a la pantalla principal o menú
+                    Intent intent = new Intent(InicioSesion.this, MenuActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(InicioSesion.this, "Correo electrónico o contraseña incorrectos", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Toast.makeText(InicioSesion.this, "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (managerDb != null) {
-            managerDb.close();
-        }
+    private void guardarCredenciales(String token, String nombre) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("token", token);
+        editor.putString("user_name", (nombre != null && !nombre.trim().isEmpty()) ? nombre : "Usuario");
+        editor.apply();
     }
 }
