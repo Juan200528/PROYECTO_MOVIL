@@ -1,0 +1,20 @@
+<resources>
+    <style name="ShapeableImageViewStyle">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="ButtonWithBorder" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="backgroundTint">@android:color/white</item>
+        <!--  fondo blanco  -->
+        <item name="strokeColor">#D32F2F</item>
+        <!--  borde rojo  -->
+        <item name="strokeWidth">2dp</item>
+        <!--  ancho del borde  -->
+        <item name="cornerRadius">40dp</item>
+        <!--  esquinas redondeadas  -->
+        <item name="iconTint">#D32F2F</item>
+        <!--  color del icono  -->
+        <item name="android:textColor">#D32F2F</item>
+        <!--  texto rojo  -->
+    </style>
+</resources>
