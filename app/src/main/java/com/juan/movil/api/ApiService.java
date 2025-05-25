@@ -5,19 +5,17 @@ import com.juan.movil.model.LoginResponse;
 import com.juan.movil.model.RegistroRequest;
 import com.juan.movil.model.RegistroResponse;
 
-
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface ApiService {
 
-    // Endpoint para registrar un usuario
+    // Endpoint for user registration
     @POST("/api/auth/register")
     Call<RegistroResponse> registrarUsuario(@Body RegistroRequest registroRequest);
 
-
-    @POST("api/auth/login")  // Ajusta esta ruta según tu backend
+    // Endpoint for user login
+    @POST("/api/auth/login")
     Call<LoginResponse> loginUsuario(@Body LoginRequest loginRequest);
-
 }

@@ -12,6 +12,7 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,6 +25,8 @@ import com.juan.movil.api.ApiService;
 import com.juan.movil.model.LoginRequest;
 import com.juan.movil.model.LoginResponse;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,6 +34,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class InicioSesion extends AppCompatActivity {
+
+    private static final String PREFS_NAME = "user_prefs";
+    private static final String KEY_TOKEN = "token";
+    private static final String KEY_USERNAME = "user_name";
 
     private EditText etCorreo, etContrasena;
     private AppCompatButton btnIniciarSesion;
@@ -51,83 +58,83 @@ public class InicioSesion extends AppCompatActivity {
 
         configurarBotonIniciarSesion();
         configurarTextoRegistrate();
+        initRetrofit();
 
-        // Inicializar Retrofit para el API
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://backend-nrpu.onrender.com/") // URL base del backend
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        apiService = retrofit.create(ApiService.class);
-
-        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         btnIniciarSesion.setOnClickListener(v -> iniciarSesion());
 
-        // Si viene un email de registro previo, ponerlo en el campo correo
+        // Si se recibió un email desde registro, ponerlo en el campo
         String emailRegistrado = getIntent().getStringExtra("email_registrado");
         if (emailRegistrado != null) {
             etCorreo.setText(emailRegistrado);
         }
     }
 
+    private void initRetrofit() {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://backend-nrpu.onrender.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
+
+        apiService = retrofit.create(ApiService.class);
+    }
+
     private void configurarBotonIniciarSesion() {
         btnIniciarSesion.setBackground(null);
 
-        GradientDrawable gradientDrawableNormal = new GradientDrawable(
+        GradientDrawable normal = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[]{Color.parseColor("#03683E"), Color.parseColor("#064349")});
-        gradientDrawableNormal.setCornerRadius(80f);
+                new int[]{Color.parseColor("#03683E"), Color.parseColor("#064349")}
+        );
+        normal.setCornerRadius(80f);
 
-        GradientDrawable gradientDrawablePressed = new GradientDrawable();
-        gradientDrawablePressed.setColor(Color.parseColor("#063449"));
-        gradientDrawablePressed.setCornerRadius(80f);
+        GradientDrawable pressed = new GradientDrawable();
+        pressed.setColor(Color.parseColor("#063449"));
+        pressed.setCornerRadius(80f);
 
-        StateListDrawable stateListDrawable = new StateListDrawable();
-        stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, gradientDrawablePressed);
-        stateListDrawable.addState(new int[]{}, gradientDrawableNormal);
+        StateListDrawable states = new StateListDrawable();
+        states.addState(new int[]{android.R.attr.state_pressed}, pressed);
+        states.addState(new int[]{}, normal);
 
-        btnIniciarSesion.setBackground(stateListDrawable);
+        btnIniciarSesion.setBackground(states);
     }
 
     private void configurarTextoRegistrate() {
         String fullText = "¿No tienes una cuenta? Registrate";
-        SpannableString spannableString = new SpannableString(fullText);
+        SpannableString spannable = new SpannableString(fullText);
 
-        spannableString.setSpan(
-                new ForegroundColorSpan(Color.parseColor("#064349")),
-                0, 22,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        );
-
-        spannableString.setSpan(
-                new ForegroundColorSpan(Color.parseColor("#39B1E0")),
-                22, fullText.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        );
+        // Color al texto normal
+        spannable.setSpan(new ForegroundColorSpan(Color.parseColor("#064349")),
+                0, 22, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-                Intent intent = new Intent(InicioSesion.this, Registro.class);
-                startActivity(intent);
+                startActivity(new Intent(InicioSesion.this, Registro.class));
                 finish();
             }
 
             @Override
             public void updateDrawState(TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setColor(Color.parseColor("#39B1E0"));
-                ds.setUnderlineText(false);
+                ds.setColor(Color.parseColor("#39B1E0")); // color del link
+                ds.setUnderlineText(false); // sin subrayado
             }
         };
 
-        spannableString.setSpan(
-                clickableSpan,
-                22, fullText.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        );
+        // Aplicar click solo a la palabra "Registrate"
+        spannable.setSpan(clickableSpan,
+                22, fullText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        tvRegistro.setText(spannableString);
+        tvRegistro.setText(spannable);
         tvRegistro.setMovementMethod(LinkMovementMethod.getInstance());
         tvRegistro.setHighlightColor(Color.TRANSPARENT);
     }
@@ -136,29 +143,50 @@ public class InicioSesion extends AppCompatActivity {
         String email = etCorreo.getText().toString().trim();
         String password = etContrasena.getText().toString().trim();
 
+        // Validaciones básicas
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Ingrese un correo válido", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         LoginRequest request = new LoginRequest(email, password);
 
+        // Llamada asíncrona para iniciar sesión
         apiService.loginUsuario(request).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     String token = response.body().getToken();
-                    String nombre = response.body().getNombre(); // Debe venir del backend
+                    String username = response.body().getUsername();
 
-                    guardarCredenciales(token, nombre);
-                    Toast.makeText(InicioSesion.this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show();
+                    if (token == null || token.trim().isEmpty()) {
+                        Toast.makeText(InicioSesion.this, "Token inválido. Credenciales incorrectas.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
 
-                    // Cambiar a la pantalla principal o menú
+                    // Guardar token y usuario en SharedPreferences
+                    guardarCredenciales(token, username, email);
+
+                    Toast.makeText(InicioSesion.this, "Inicio de sesión exitoso. Bienvenido, " + username, Toast.LENGTH_LONG).show();
+
+                    // Navegar a la actividad menú
                     Intent intent = new Intent(InicioSesion.this, MenuActivity.class);
                     startActivity(intent);
                     finish();
+
                 } else {
-                    Toast.makeText(InicioSesion.this, "Correo electrónico o contraseña incorrectos", Toast.LENGTH_LONG).show();
+                    // Obtener error del body si es posible
+                    String mensajeError = "Error al iniciar sesión";
+                    try {
+                        if (response.errorBody() != null)
+                            mensajeError = response.errorBody().string();
+                    } catch (Exception ignored) {}
+                    Toast.makeText(InicioSesion.this, mensajeError, Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -169,10 +197,11 @@ public class InicioSesion extends AppCompatActivity {
         });
     }
 
-    private void guardarCredenciales(String token, String nombre) {
+    private void guardarCredenciales(String token, String nombre, String email) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("token", token);
-        editor.putString("user_name", (nombre != null && !nombre.trim().isEmpty()) ? nombre : "Usuario");
+        editor.putString(KEY_TOKEN, token);
+        editor.putString(KEY_USERNAME, (nombre != null && !nombre.trim().isEmpty()) ? nombre : "Usuario");
+        editor.putString("user_email", email);
         editor.apply();
     }
 }

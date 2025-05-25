@@ -7,24 +7,26 @@ public class LoginResponse {
     @SerializedName("token")
     private String token;
 
-    @SerializedName("nombre")
-    private String nombre;
+    @SerializedName("username")
+    private String username;
+
+    public LoginResponse() {
+        // Constructor vacío para Gson
+    }
 
     public String getToken() {
         return token;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getUsername() {
+        return username;
     }
-
-    // Setters si necesitas (opcional)
 
     public void setToken(String token) {
         this.token = token;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

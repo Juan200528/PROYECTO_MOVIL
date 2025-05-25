@@ -4,12 +4,14 @@ public class LoginRequest {
     private String email;
     private String password;
 
+    public LoginRequest() {
+        // Constructor vacío opcional
+    }
+
     public LoginRequest(String email, String password) {
         this.email = email;
         this.password = password;
     }
-
-    // Getters y setters si los necesitas (opcional)
 
     public String getEmail() {
         return email;
