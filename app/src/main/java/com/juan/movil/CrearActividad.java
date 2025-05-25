@@ -21,7 +21,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -34,7 +33,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.juan.movil.db.ManagerDb;import com.juan.movil.model.Actividad;
+import com.juan.movil.api.ApiService;
+import com.juan.movil.model.CrearListaResponse;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,11 +45,20 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class CrearActividad extends AppCompatActivity {
     private static final String TAG = "CrearActividad";
-    private static final int TARGET_WIDTH_DP = 84; // Ancho fijo del contenedor
-    private static final int TARGET_HEIGHT_DP = 56; // Alto fijo del contenedor
-    private static final int IMAGE_RADIUS_DP = 16; // Radio de redondeo
+    private static final int TARGET_WIDTH_DP = 84;
+    private static final int TARGET_HEIGHT_DP = 56;
+    private static final int IMAGE_RADIUS_DP = 16;
     private static final int REQUEST_CODE_PERMISSIONS = 1001;
 
     private EditText etTitulo, etDescripcion, etFecha, etLugar, etResponsables, etImage;
@@ -59,10 +68,12 @@ public class CrearActividad extends AppCompatActivity {
     private Calendar calendario = Calendar.getInstance();
     private SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
-    private ManagerDb managerDb;
     private SharedPreferences sharedPreferences;
     private String imagenRuta;
+    private Uri imagenUri; // Guardar Uri para enviar
+
     private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,22 +81,15 @@ public class CrearActividad extends AppCompatActivity {
         setContentView(R.layout.crear_actividad);
 
         inicializarVistas();
-        configurarBaseDatos();
+        configurarSharedPreferences();
         configurarImagePicker();
         configurarBotones();
+        configurarRetrofit();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_CODE_PERMISSIONS);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (managerDb != null) {
-            managerDb.close();
         }
     }
 
@@ -103,9 +107,7 @@ public class CrearActividad extends AppCompatActivity {
         ivActividadImagen.setImageResource(R.drawable.default_image);
     }
 
-    private void configurarBaseDatos() {
-        managerDb = new ManagerDb(this);
-        managerDb.open(); // Abrir conexión a base de datos
+    private void configurarSharedPreferences() {
         sharedPreferences = getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
     }
 
@@ -114,11 +116,11 @@ public class CrearActividad extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
+                        imagenUri = result.getData().getData();
                         try {
-                            Bitmap processedBitmap = procesarImagen(imageUri);
+                            Bitmap processedBitmap = procesarImagen(imagenUri);
                             ivActividadImagen.setImageBitmap(processedBitmap);
-                            imagenRuta = saveOriginalImage(imageUri);
+                            imagenRuta = saveOriginalImage(imagenUri);
                             etImage.setText("Imagen seleccionada ✅");
                         } catch (Exception e) {
                             Log.e(TAG, "Error al procesar imagen: ", e);
@@ -133,7 +135,6 @@ public class CrearActividad extends AppCompatActivity {
         etFecha.setOnClickListener(v -> mostrarCalendario());
         btnSubir.setOnClickListener(v -> seleccionarImagen());
 
-        // Configurar botón "Crear" con gradiente
         GradientDrawable gradientDrawableNormal = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
                 new int[]{Color.parseColor("#03683E"), Color.parseColor("#064349")});
@@ -148,7 +149,16 @@ public class CrearActividad extends AppCompatActivity {
         stateListDrawable.addState(new int[]{}, gradientDrawableNormal);
         btnCrear.setBackground(stateListDrawable);
 
-        btnCrear.setOnClickListener(v -> guardarActividad());
+        btnCrear.setOnClickListener(v -> enviarActividad());
+    }
+
+    private void configurarRetrofit() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://backend-nrpu.onrender.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        apiService = retrofit.create(ApiService.class);
     }
 
     private void seleccionarImagen() {
@@ -172,140 +182,177 @@ public class CrearActividad extends AppCompatActivity {
             Bitmap bitmapOriginal = BitmapFactory.decodeStream(is, null, options);
             if (bitmapOriginal == null) return null;
 
-            Bitmap scaledBitmap = escalarAlCentro(bitmapOriginal, targetWidth, targetHeight);
-            return aplicarMascaraRedondeada(scaledBitmap, targetWidth, targetHeight);
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmapOriginal, targetWidth, targetHeight, true);
+            return recortarImagenConBordesRedondeados(scaledBitmap, dpToPx(IMAGE_RADIUS_DP));
         }
     }
 
-    private int calcularFactorEscalado(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        final int width = options.outWidth;
-        final int height = options.outHeight;
-        int inSampleSize = 1;
-
-        while ((width / inSampleSize) > reqWidth * 2 || (height / inSampleSize) > reqHeight * 2) {
-            inSampleSize *= 2;
-        }
-
-        return inSampleSize;
-    }
-
-    private Bitmap escalarAlCentro(Bitmap original, int targetWidth, int targetHeight) {
-        float srcAspect = (float) original.getWidth() / original.getHeight();
-        float dstAspect = (float) targetWidth / targetHeight;
-
-        Rect srcRect = new Rect();
-        if (srcAspect > dstAspect) {
-            int srcWidth = (int) (original.getHeight() * dstAspect);
-            int left = (original.getWidth() - srcWidth) / 2;
-            srcRect.set(left, 0, left + srcWidth, original.getHeight());
-        } else {
-            int srcHeight = (int) (original.getWidth() / dstAspect);
-            int top = (original.getHeight() - srcHeight) / 2;
-            srcRect.set(0, top, original.getWidth(), top + srcHeight);
-        }
-
-        return Bitmap.createBitmap(original, srcRect.left, srcRect.top, srcRect.width(), srcRect.height());
-    }
-
-    private Bitmap aplicarMascaraRedondeada(Bitmap bitmap, int ancho, int alto) {
-        Bitmap output = Bitmap.createBitmap(ancho, alto, Bitmap.Config.ARGB_8888);
+    private Bitmap recortarImagenConBordesRedondeados(Bitmap bitmap, int radiusPx) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
-        Paint paint = new Paint();
-        Rect rect = new Rect(0, 0, ancho, alto);
-        RectF rectF = new RectF(rect);
+
+        final Paint paint = new Paint();
         paint.setAntiAlias(true);
-        canvas.drawRoundRect(rectF, dpToPx(IMAGE_RADIUS_DP), dpToPx(IMAGE_RADIUS_DP), paint);
+
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(Color.WHITE);
+        canvas.drawRoundRect(rectF, radiusPx, radiusPx, paint);
+
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, null, rect, paint);
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
         return output;
     }
 
+    private int calcularFactorEscalado(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        int height = options.outHeight;
+        int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            int halfHeight = height / 2;
+            int halfWidth = width / 2;
+
+            while ((halfHeight / inSampleSize) >= reqHeight &&
+                    (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round((float) dp * density);
+    }
+
+    private void mostrarCalendario() {
+        int year = calendario.get(Calendar.YEAR);
+        int month = calendario.get(Calendar.MONTH);
+        int day = calendario.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                (view, year1, month1, dayOfMonth) -> {
+                    String fechaSeleccionada = String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month1 + 1, year1);
+                    etFecha.setText(fechaSeleccionada);
+                }, year, month, day);
+        datePickerDialog.show();
+    }
+
     private String saveOriginalImage(Uri imageUri) throws Exception {
-        File directory = new File(getFilesDir(), "actividad_imagenes");
-        if (!directory.exists()) directory.mkdirs();
+        InputStream inputStream = getContentResolver().openInputStream(imageUri);
+        if (inputStream == null) return null;
 
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis());
-        File file = new File(directory, "IMG_" + timeStamp + ".jpg");
-
-        try (InputStream inputStream = getContentResolver().openInputStream(imageUri);
-             FileOutputStream outputStream = new FileOutputStream(file)) {
-            byte[] buffer = new byte[1024];
+        File file = new File(getCacheDir(), "imagen_actividad.jpg");
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+            byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
         }
-
         return file.getAbsolutePath();
     }
 
-    private void mostrarCalendario() {
-        DatePickerDialog dialogo = new DatePickerDialog(
-                this,
-                android.R.style.Theme_Holo_Light_Dialog,
-                (view, año, mes, dia) -> actualizarFechaSeleccionada(año, mes, dia),
-                calendario.get(Calendar.YEAR),
-                calendario.get(Calendar.MONTH),
-                calendario.get(Calendar.DAY_OF_MONTH));
-        dialogo.setTitle("Seleccione una fecha");
-        dialogo.show();
-    }
+    private void enviarActividad() {
+        String titulo = etTitulo.getText().toString().trim();
+        String descripcion = etDescripcion.getText().toString().trim();
+        String fecha = etFecha.getText().toString().trim();
+        String lugar = etLugar.getText().toString().trim();
+        String responsables = etResponsables.getText().toString().trim();
 
-    private void actualizarFechaSeleccionada(int año, int mes, int dia) {
-        calendario.set(Calendar.YEAR, año);
-        calendario.set(Calendar.MONTH, mes);
-        calendario.set(Calendar.DAY_OF_MONTH, dia);
-        etFecha.setText(formatoFecha.format(calendario.getTime()));
-    }
-
-    private void guardarActividad() {
-        if (!validarCamposObligatorios()) return;
-
-        try {
-            Date fechaSeleccionada = formatoFecha.parse(etFecha.getText().toString().trim());
-            Date fechaActual = new Date();
-
-            if (fechaSeleccionada.before(fechaActual)) {
-                Toast.makeText(this, "La fecha no puede ser anterior a hoy", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        } catch (ParseException e) {
-            Toast.makeText(this, "Formato de fecha inválido", Toast.LENGTH_SHORT).show();
+        if (titulo.isEmpty() || descripcion.isEmpty() || fecha.isEmpty() || lugar.isEmpty() || responsables.isEmpty()) {
+            Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Actividad actividad = new Actividad();
-        actividad.setTitulo(etTitulo.getText().toString().trim());
-        actividad.setDescripcion(etDescripcion.getText().toString().trim());
-        actividad.setFecha(etFecha.getText().toString().trim());
-        actividad.setLugar(etLugar.getText().toString().trim());
-        actividad.setResponsables(etResponsables.getText().toString().trim());
-        actividad.setIdCreador(sharedPreferences.getInt("user_id", -1));
-        actividad.setEstado("activo");
-        actividad.setImagenRuta(imagenRuta != null ? imagenRuta : "");
-
-        long resultado = managerDb.insertarActividad(actividad);
-        if (resultado != -1) {
-            Toast.makeText(this, "Actividad creada exitosamente", Toast.LENGTH_SHORT).show();
-            setResult(RESULT_OK);
-            finish();
-        } else {
-            Toast.makeText(this, "Error al crear la actividad", Toast.LENGTH_SHORT).show();
+        if (!validarFecha(fecha)) {
+            Toast.makeText(this, "Formato de fecha incorrecto (dd/MM/yyyy)", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        int idCreador = sharedPreferences.getInt("user_id", -1);
+        if (idCreador == -1) {
+            Toast.makeText(this, "Usuario no identificado. Por favor inicia sesión.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (imagenRuta == null || imagenRuta.isEmpty()) {
+            Toast.makeText(this, "Por favor selecciona una imagen", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File archivoImagen = new File(imagenRuta);
+        if (!archivoImagen.exists()) {
+            Toast.makeText(this, "Archivo de imagen no encontrado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        RequestBody requestTitulo = RequestBody.create(titulo, MediaType.parse("text/plain"));
+        RequestBody requestDescripcion = RequestBody.create(descripcion, MediaType.parse("text/plain"));
+        RequestBody requestFecha = RequestBody.create(fecha, MediaType.parse("text/plain"));
+        RequestBody requestLugar = RequestBody.create(lugar, MediaType.parse("text/plain"));
+        RequestBody requestResponsables = RequestBody.create(responsables, MediaType.parse("text/plain"));
+        RequestBody requestIdCreador = RequestBody.create(String.valueOf(idCreador), MediaType.parse("text/plain"));
+
+        RequestBody requestFile = RequestBody.create(archivoImagen, MediaType.parse("image/*"));
+        MultipartBody.Part imagenPart = MultipartBody.Part.createFormData("imagen", archivoImagen.getName(), requestFile);
+
+        Call<CrearListaResponse> call = apiService.crearActividad(
+                requestTitulo,
+                requestDescripcion,
+                requestFecha,
+                requestLugar,
+                requestResponsables,
+                requestIdCreador,
+                imagenPart);
+
+        call.enqueue(new Callback<CrearListaResponse>() {
+            @Override
+            public void onResponse(Call<CrearListaResponse> call, Response<CrearListaResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    CrearListaResponse resp = response.body();
+                    if (resp.isSuccess()) {
+                        Toast.makeText(CrearActividad.this, "Actividad creada con éxito", Toast.LENGTH_SHORT).show();
+                        limpiarCampos();
+                    } else {
+                        Toast.makeText(CrearActividad.this, "Error: " + resp.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(CrearActividad.this, "Error al crear la actividad", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Response error: " + response.code() + " - " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CrearListaResponse> call, Throwable t) {
+                Toast.makeText(CrearActividad.this, "Fallo en la conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
     }
 
-    private boolean validarCamposObligatorios() {
-        if (etTitulo.getText().toString().trim().isEmpty() ||
-                etDescripcion.getText().toString().trim().isEmpty() ||
-                etFecha.getText().toString().trim().isEmpty() ||
-                etLugar.getText().toString().trim().isEmpty()) {
-            Toast.makeText(this, "Complete todos los campos obligatorios", Toast.LENGTH_SHORT).show();
+    private boolean validarFecha(String fecha) {
+        try {
+            Date date = formatoFecha.parse(fecha);
+            return date != null;
+        } catch (ParseException e) {
             return false;
         }
-        return true;
     }
 
-    private int dpToPx(int dp) {
-        return (int) (dp * getResources().getDisplayMetrics().density);
+    private void limpiarCampos() {
+        etTitulo.setText("");
+        etDescripcion.setText("");
+        etFecha.setText("");
+        etLugar.setText("");
+        etResponsables.setText("");
+        etImage.setText("");
+        ivActividadImagen.setImageResource(R.drawable.default_image);
+        imagenRuta = null;
+        imagenUri = null;
     }
 }

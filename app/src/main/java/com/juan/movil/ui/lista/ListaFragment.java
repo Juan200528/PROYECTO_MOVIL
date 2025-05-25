@@ -19,9 +19,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.juan.movil.R;
 import com.juan.movil.db.ManagerDb;
-import com.juan.movil.model.Actividad;
-import com.juan.movil.model.ActividadAdapterLista;
-import com.juan.movil.model.Asistente;
+import com.juan.movil.models.Actividad;
+import com.juan.movil.models.ActividadAdapterLista;
+import com.juan.movil.models.Asistente;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -6,9 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.juan.movil.model.Actividad;
-import com.juan.movil.model.Asistente;
-import com.juan.movil.model.Notificacion;
+import com.juan.movil.models.Actividad;
+import com.juan.movil.models.Asistente;
+import com.juan.movil.models.Notificacion;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
