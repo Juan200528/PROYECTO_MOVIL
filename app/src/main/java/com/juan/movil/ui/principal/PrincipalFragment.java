@@ -73,8 +73,17 @@ public class PrincipalFragment extends Fragment implements ActividadAdapter.OnAc
         managerDb = new ManagerDb(getContext());
         managerDb.open();
 
-        userId = requireContext().getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE)
-                .getInt("user_id", -1);
+        // ✅ Leer user_id como String y convertirlo a int
+        String userIdStr = requireContext()
+                .getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE)
+                .getString("user_id", "-1");
+
+        try {
+            userId = Integer.parseInt(userIdStr);
+        } catch (NumberFormatException e) {
+            userId = -1;
+            Log.e("PrincipalFragment", "Error al convertir user_id a entero", e);
+        }
 
         recyclerActividades.setLayoutManager(new LinearLayoutManager(getContext()));
         itemList = new ArrayList<>();
@@ -178,12 +187,12 @@ public class PrincipalFragment extends Fragment implements ActividadAdapter.OnAc
             actividad.setTitulo(etEditarTitulo.getText().toString());
             actividad.setDescripcion(etEditarDescripcion.getText().toString());
             String nuevaFecha = etEditarFecha.getText().toString();
-            actividad.setFecha(nuevaFecha); // Permitir cambiar la fecha
+            actividad.setFecha(nuevaFecha);
             actividad.setLugar(etEditarLugar.getText().toString());
             actividad.setResponsables(etEditarResponsables.getText().toString());
 
             managerDb.actualizarActividad(actividad);
-            cargarActividades(); // Recargar para reflejar el cambio de fecha
+            cargarActividades();
             Toast.makeText(getContext(), "Actividad actualizada", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
