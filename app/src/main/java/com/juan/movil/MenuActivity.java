@@ -47,9 +47,6 @@ public class MenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
-        // Mostrar mensaje de bienvenida
-        Toast.makeText(this, "¡Bienvenido al menú!", Toast.LENGTH_SHORT).show();
-
         sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
 
         if (!verificarSesion()) return;
@@ -80,7 +77,6 @@ public class MenuActivity extends AppCompatActivity {
         String nombre = sharedPreferences.getString("user_name", null);
         String email = sharedPreferences.getString("user_email", null);
 
-        Toast.makeText(this, "Nombre: " + nombre + "\nEmail: " + email, Toast.LENGTH_LONG).show();
 
         if (nombre == null || email == null) {
             startActivity(new Intent(this, MenuActivity.class)
