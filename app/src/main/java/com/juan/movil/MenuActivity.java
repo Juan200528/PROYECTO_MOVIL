@@ -54,13 +54,13 @@ public class MenuActivity extends AppCompatActivity {
         // Validar sesión y redirigir si no existe
         String nombre = sharedPreferences.getString("user_name", null);
         String email = sharedPreferences.getString("user_email", null);
-        if (nombre == null || email == null) {
+       /* if (nombre == null || email == null) {
             Intent intent = new Intent(this, PantallaPrincipal.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
             return;
-        }
+        }*/
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
