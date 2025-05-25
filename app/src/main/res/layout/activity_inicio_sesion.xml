@@ -31,6 +31,7 @@
         android:layout_marginTop="8dp"
         android:textColor="@color/colorN"/>
 
+    <!-- Espacio -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -45,7 +46,7 @@
         android:id="@+id/etCorreo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Correo electronico"
+        android:hint="Correo electrónico"
         android:inputType="textEmailAddress"
         android:background="@drawable/edit_text_border"
         android:layout_marginTop="24dp"
@@ -62,6 +63,7 @@
         android:layout_marginTop="12dp"
         android:padding="12dp" />
 
+    <!-- Espacio -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -89,8 +91,11 @@
         android:layout_height="wrap_content"
         android:text="¿No tienes una cuenta? Regístrate"
         android:layout_marginTop="16dp"
-        android:textAlignment="center"/>
+        android:textAlignment="center"
+        android:textColor="@color/colorN"
+        android:textStyle="bold"/>
 
+    <!-- Espacio -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -111,4 +116,5 @@
         android:layout_marginTop="48dp"
         android:textColor="@color/mensajes"
         android:textSize="12sp"/>
+
 </LinearLayout>
