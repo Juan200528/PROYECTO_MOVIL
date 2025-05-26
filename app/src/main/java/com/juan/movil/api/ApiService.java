@@ -21,9 +21,11 @@ import retrofit2.http.Part;
 
 public interface ApiService {
 
+    // Endpoint for user registration
     @POST("/api/auth/register")
     Call<RegistroResponse> registrarUsuario(@Body RegistroRequest registroRequest);
 
+    // Endpoint for user login
     @POST("/api/auth/login")
     Call<LoginResponse> loginUsuario(@Body LoginRequest loginRequest);
 
@@ -41,4 +43,5 @@ public interface ApiService {
 
     @GET("actividades/promocionadas")
     Call<List<Actividad>> obtenerActividadesPromocionadas(@Header("Authorization") String token);
+
 }
