@@ -1,49 +1,30 @@
 package com.juan.movil.model;
 
-import com.google.gson.annotations.SerializedName;
-
+/**
+ * Clase para representar la petición de creación de actividad
+ * Usado para enviar datos al backend cuando se crea una nueva actividad
+ */
 public class CrearActividadRequest {
 
-    @SerializedName("titulo")
     private String titulo;
-
-    @SerializedName("descripcion")
     private String descripcion;
-
-    @SerializedName("fecha")
     private String fecha;
-
-    @SerializedName("lugar")
     private String lugar;
-
-    @SerializedName("responsables")
     private String responsables;
+    // La imagen se maneja como MultipartBody.Part en la petición HTTP
 
-    @SerializedName("id_creador")
-    private int idCreador;
-
-    @SerializedName("estado")
-    private String estado;
-
-    @SerializedName("imagen_ruta")
-    private String imagenRuta;
-
-    // Constructor vacío
+    // Constructor por defecto
     public CrearActividadRequest() {
     }
 
-    // Constructor completo
+    // Constructor con parámetros
     public CrearActividadRequest(String titulo, String descripcion, String fecha,
-                                 String lugar, String responsables, int idCreador,
-                                 String estado, String imagenRuta) {
+                                 String lugar, String responsables) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.fecha = fecha;
         this.lugar = lugar;
         this.responsables = responsables;
-        this.idCreador = idCreador;
-        this.estado = estado;
-        this.imagenRuta = imagenRuta;
     }
 
     // Getters y Setters
@@ -87,27 +68,14 @@ public class CrearActividadRequest {
         this.responsables = responsables;
     }
 
-    public int getIdCreador() {
-        return idCreador;
-    }
-
-    public void setIdCreador(int idCreador) {
-        this.idCreador = idCreador;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public String getImagenRuta() {
-        return imagenRuta;
-    }
-
-    public void setImagenRuta(String imagenRuta) {
-        this.imagenRuta = imagenRuta;
+    @Override
+    public String toString() {
+        return "CrearActividadRequest{" +
+                "titulo='" + titulo + '\'' +
+                ", descripcion='" + descripcion + '\'' +
+                ", fecha='" + fecha + '\'' +
+                ", lugar='" + lugar + '\'' +
+                ", responsables='" + responsables + '\'' +
+                '}';
     }
 }

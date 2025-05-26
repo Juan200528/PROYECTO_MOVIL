@@ -73,17 +73,10 @@ public class PrincipalFragment extends Fragment implements ActividadAdapter.OnAc
         managerDb = new ManagerDb(getContext());
         managerDb.open();
 
-        // ✅ Leer user_id como String y convertirlo a int
-        String userIdStr = requireContext()
+        // ✅ Obtener user_id como int directamente
+        userId = requireContext()
                 .getSharedPreferences("user_prefs", requireContext().MODE_PRIVATE)
-                .getString("user_id", "-1");
-
-        try {
-            userId = Integer.parseInt(userIdStr);
-        } catch (NumberFormatException e) {
-            userId = -1;
-            Log.e("PrincipalFragment", "Error al convertir user_id a entero", e);
-        }
+                .getInt("user_id", -1);
 
         recyclerActividades.setLayoutManager(new LinearLayoutManager(getContext()));
         itemList = new ArrayList<>();
@@ -186,8 +179,7 @@ public class PrincipalFragment extends Fragment implements ActividadAdapter.OnAc
         btnGuardarCambios.setOnClickListener(v -> {
             actividad.setTitulo(etEditarTitulo.getText().toString());
             actividad.setDescripcion(etEditarDescripcion.getText().toString());
-            String nuevaFecha = etEditarFecha.getText().toString();
-            actividad.setFecha(nuevaFecha);
+            actividad.setFecha(etEditarFecha.getText().toString());
             actividad.setLugar(etEditarLugar.getText().toString());
             actividad.setResponsables(etEditarResponsables.getText().toString());
 

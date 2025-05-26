@@ -35,7 +35,6 @@ import androidx.core.content.ContextCompat;
 
 import com.juan.movil.api.ApiService;
 import com.juan.movil.db.ManagerDb;
-import com.juan.movil.model.CrearActividadRequest;
 import com.juan.movil.model.CrearActividadResponse;
 import com.juan.movil.models.Actividad;
 
@@ -49,7 +48,10 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,10 +65,6 @@ public class CrearActividad extends AppCompatActivity {
     private static final int TARGET_HEIGHT_DP = 56;
     private static final int IMAGE_RADIUS_DP = 16;
     private static final int REQUEST_CODE_PERMISSIONS = 1001;
-
-    // URL del backend - Reemplaza con tu URL real
-    // VVVV IMPORTANTÍSIMO: Cambia esta URL por la de tu backend real VVVV
-    private static final String BASE_URL = "https://tu-backend-url.com/api/"; // <--- ¡AQUÍ!
 
     private EditText etTitulo, etDescripcion, etFecha, etLugar, etResponsables, etImage;
     private ImageButton btnCalendario, btnSubir;
@@ -356,7 +354,6 @@ public class CrearActividad extends AppCompatActivity {
             calActual.set(Calendar.SECOND, 0);
             calActual.set(Calendar.MILLISECOND, 0);
 
-
             if (calSelected.before(calActual)) {
                 Toast.makeText(this, "La fecha no puede ser anterior a hoy", Toast.LENGTH_SHORT).show();
                 return;
@@ -366,33 +363,54 @@ public class CrearActividad extends AppCompatActivity {
             return;
         }
 
-        // Construir el objeto de solicitud para el backend
-        CrearActividadRequest request = new CrearActividadRequest();
-        request.setTitulo(etTitulo.getText().toString().trim());
-        request.setDescripcion(etDescripcion.getText().toString().trim());
-        request.setFecha(etFecha.getText().toString().trim());
-        request.setLugar(etLugar.getText().toString().trim());
-        request.setResponsables(etResponsables.getText().toString().trim());
-        // Obtener el ID del creador de SharedPreferences
-        request.setIdCreador(sharedPreferences.getInt("user_id", -1));
-        request.setEstado("activo"); // Estado por defecto
-        request.setImagenRuta(imagenRuta != null ? imagenRuta : ""); // Ruta de la imagen guardada localmente
-
         // Deshabilitar el botón y cambiar el texto para indicar que se está guardando
         btnCrear.setEnabled(false);
         btnCrear.setText("Guardando...");
 
         // Intentar guardar en el backend primero
-        enviarActividadAlBackend(request);
+        enviarActividadAlBackend();
     }
 
-    // Envía la solicitud de creación de actividad al backend
-    private void enviarActividadAlBackend(CrearActividadRequest request) {
+    // Envía la solicitud de creación de actividad al backend usando multipart
+    private void enviarActividadAlBackend() {
         // Obtener el token de autenticación de SharedPreferences
         String token = sharedPreferences.getString("auth_token", "");
 
+        // Crear RequestBody para cada campo de texto
+        RequestBody tituloBody = RequestBody.create(MediaType.parse("text/plain"), etTitulo.getText().toString().trim());
+        RequestBody descripcionBody = RequestBody.create(MediaType.parse("text/plain"), etDescripcion.getText().toString().trim());
+        RequestBody fechaBody = RequestBody.create(MediaType.parse("text/plain"), etFecha.getText().toString().trim());
+        RequestBody lugarBody = RequestBody.create(MediaType.parse("text/plain"), etLugar.getText().toString().trim());
+        RequestBody responsablesBody = RequestBody.create(MediaType.parse("text/plain"), etResponsables.getText().toString().trim());
+
+        // Preparar la imagen si existe
+        MultipartBody.Part imagenPart = null;
+        if (imagenRuta != null && !imagenRuta.isEmpty()) {
+            File imageFile = new File(imagenRuta);
+            if (imageFile.exists()) {
+                RequestBody imageRequestBody = RequestBody.create(MediaType.parse("image/*"), imageFile);
+                imagenPart = MultipartBody.Part.createFormData("imagen", imageFile.getName(), imageRequestBody);
+            }
+        }
+
+        // Si no hay imagen, crear un part vacío o null según lo que espere tu backend
+        if (imagenPart == null) {
+            // Crear un RequestBody vacío para la imagen
+            RequestBody emptyBody = RequestBody.create(MediaType.parse("text/plain"), "");
+            imagenPart = MultipartBody.Part.createFormData("imagen", "", emptyBody);
+        }
+
         // Realizar la llamada al API
-        Call<CrearActividadResponse> call = apiService.crearActividad("Bearer " + token, request);
+        Call<CrearActividadResponse> call = apiService.crearActividad(
+                "Bearer " + token,
+                tituloBody,
+                descripcionBody,
+                fechaBody,
+                lugarBody,
+                responsablesBody,
+                imagenPart
+        );
+
         call.enqueue(new Callback<CrearActividadResponse>() {
             @Override
             public void onResponse(Call<CrearActividadResponse> call, Response<CrearActividadResponse> response) {
@@ -405,7 +423,7 @@ public class CrearActividad extends AppCompatActivity {
 
                     if (actividadResponse.isSuccess()) {
                         // Si el backend reporta éxito, guardar también localmente
-                        guardarActividadLocalDesdeResponse(actividadResponse, request);
+                        guardarActividadLocalDesdeResponse(actividadResponse);
                         Toast.makeText(CrearActividad.this, actividadResponse.getMessage(), Toast.LENGTH_SHORT).show();
                         setResult(RESULT_OK); // Indicar que la operación fue exitosa
                         finish(); // Cerrar la actividad
@@ -415,8 +433,6 @@ public class CrearActividad extends AppCompatActivity {
                                 actividadResponse.getError() : "Error desconocido del servidor";
                         Toast.makeText(CrearActividad.this, errorMsg, Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "Error del servidor: " + errorMsg);
-                        // En caso de un error específico del servidor, podríamos no guardar localmente si la acción fue rechazada.
-                        // Para este caso, mantenemos la lógica de no guardar localmente si hay un error del servidor.
                     }
                 } else {
                     // Error en la respuesta HTTP (ej. 401 Unauthorized, 404 Not Found, 500 Internal Server Error)
@@ -429,7 +445,7 @@ public class CrearActividad extends AppCompatActivity {
                     }
                     Toast.makeText(CrearActividad.this, "Error al conectar con el servidor. Guardando localmente.", Toast.LENGTH_LONG).show();
                     // Si hay un error HTTP, guardar localmente como fallback
-                    guardarActividadLocalSoloRequest(request);
+                    guardarActividadLocalSinRespuesta();
                 }
             }
 
@@ -442,13 +458,13 @@ public class CrearActividad extends AppCompatActivity {
                 Log.e(TAG, "Error de conexión o red: " + t.getMessage(), t);
                 Toast.makeText(CrearActividad.this, "No se pudo conectar al servidor. Actividad guardada localmente.", Toast.LENGTH_LONG).show();
                 // Si hay un fallo de conexión (sin internet, servidor no disponible), guardar localmente
-                guardarActividadLocalSoloRequest(request);
+                guardarActividadLocalSinRespuesta();
             }
         });
     }
 
     // Guarda la actividad localmente utilizando los datos de la respuesta del backend (si disponible)
-    private void guardarActividadLocalDesdeResponse(CrearActividadResponse response, CrearActividadRequest request) {
+    private void guardarActividadLocalDesdeResponse(CrearActividadResponse response) {
         Actividad actividad = new Actividad();
 
         if (response.getData() != null) {
@@ -463,16 +479,16 @@ public class CrearActividad extends AppCompatActivity {
             actividad.setEstado(data.getEstado());
             actividad.setImagenRuta(data.getImagenRuta()); // Usar la ruta de imagen del backend si la envía
         } else {
-            // Fallback: Si no hay datos en la respuesta del servidor, usar los del request original
-            Log.w(TAG, "No hay datos de actividad en la respuesta del servidor. Usando datos del request.");
-            actividad.setTitulo(request.getTitulo());
-            actividad.setDescripcion(request.getDescripcion());
-            actividad.setFecha(request.getFecha());
-            actividad.setLugar(request.getLugar());
-            actividad.setResponsables(request.getResponsables());
-            actividad.setIdCreador(request.getIdCreador());
-            actividad.setEstado(request.getEstado());
-            actividad.setImagenRuta(request.getImagenRuta());
+            // Fallback: Si no hay datos en la respuesta del servidor, usar los datos del formulario
+            Log.w(TAG, "No hay datos de actividad en la respuesta del servidor. Usando datos del formulario.");
+            actividad.setTitulo(etTitulo.getText().toString().trim());
+            actividad.setDescripcion(etDescripcion.getText().toString().trim());
+            actividad.setFecha(etFecha.getText().toString().trim());
+            actividad.setLugar(etLugar.getText().toString().trim());
+            actividad.setResponsables(etResponsables.getText().toString().trim());
+            actividad.setIdCreador(sharedPreferences.getInt("user_id", -1));
+            actividad.setEstado("activo");
+            actividad.setImagenRuta(imagenRuta != null ? imagenRuta : "");
         }
 
         long resultado = managerDb.insertarActividad(actividad);
@@ -484,17 +500,17 @@ public class CrearActividad extends AppCompatActivity {
         }
     }
 
-    // Guarda la actividad localmente usando los datos de la solicitud original (usado como fallback)
-    private void guardarActividadLocalSoloRequest(CrearActividadRequest request) {
+    // Guarda la actividad localmente usando los datos del formulario (usado como fallback)
+    private void guardarActividadLocalSinRespuesta() {
         Actividad actividad = new Actividad();
-        actividad.setTitulo(request.getTitulo());
-        actividad.setDescripcion(request.getDescripcion());
-        actividad.setFecha(request.getFecha());
-        actividad.setLugar(request.getLugar());
-        actividad.setResponsables(request.getResponsables());
-        actividad.setIdCreador(request.getIdCreador());
-        actividad.setEstado(request.getEstado());
-        actividad.setImagenRuta(request.getImagenRuta());
+        actividad.setTitulo(etTitulo.getText().toString().trim());
+        actividad.setDescripcion(etDescripcion.getText().toString().trim());
+        actividad.setFecha(etFecha.getText().toString().trim());
+        actividad.setLugar(etLugar.getText().toString().trim());
+        actividad.setResponsables(etResponsables.getText().toString().trim());
+        actividad.setIdCreador(sharedPreferences.getInt("user_id", -1));
+        actividad.setEstado("activo");
+        actividad.setImagenRuta(imagenRuta != null ? imagenRuta : "");
 
         long resultado = managerDb.insertarActividad(actividad);
         if (resultado != -1) {

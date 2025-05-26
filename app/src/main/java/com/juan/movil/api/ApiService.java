@@ -17,16 +17,17 @@ import retrofit2.http.Part;
 
 public interface ApiService {
 
-    // Endpoint for user registration
+    // Registro de usuario
     @POST("/api/auth/register")
     Call<RegistroResponse> registrarUsuario(@Body RegistroRequest registroRequest);
 
-    // Endpoint for user login
+    // Inicio de sesión
     @POST("/api/auth/login")
     Call<LoginResponse> loginUsuario(@Body LoginRequest loginRequest);
 
+    // Crear actividad con imagen
     @Multipart
-    @POST("actividades")
+    @POST("/api/tasks")
     Call<CrearActividadResponse> crearActividad(
             @Header("Authorization") String token,
             @Part("titulo") RequestBody titulo,
@@ -36,5 +37,4 @@ public interface ApiService {
             @Part("responsables") RequestBody responsables,
             @Part MultipartBody.Part imagen
     );
-
 }
