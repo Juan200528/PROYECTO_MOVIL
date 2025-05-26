@@ -30,7 +30,7 @@ public interface ApiService {
     Call<LoginResponse> loginUsuario(@Body LoginRequest loginRequest);
 
     @Multipart
-    @POST("actividades")
+    @POST("/api/tasks")
     Call<CrearActividadResponse> crearActividad(
             @Header("Authorization") String token,
             @Part("titulo") RequestBody titulo,
@@ -38,6 +38,7 @@ public interface ApiService {
             @Part("fecha") RequestBody fecha,
             @Part("lugar") RequestBody lugar,
             @Part("responsables") RequestBody responsables,
+            @Part("idCreador") RequestBody idCreador,
             @Part MultipartBody.Part imagen
     );
 
