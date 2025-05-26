@@ -49,7 +49,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -388,15 +390,45 @@ public class CrearActividad extends AppCompatActivity {
 
     // Envía la solicitud de creación de actividad al backend
     private void enviarActividadAlBackend(CrearActividadRequest request) {
-        // Obtener el token de autenticación de SharedPreferences
         String token = sharedPreferences.getString("auth_token", "");
+        if (token.isEmpty()) {
+            Toast.makeText(this, "No hay token de autenticación.", Toast.LENGTH_SHORT).show();
+            btnCrear.setEnabled(true);
+            btnCrear.setText("Crear Actividad");
+            return;
+        }
 
-        // Realizar la llamada al API
-        Call<CrearActividadResponse> call = apiService.crearActividad("Bearer " + token, request);
+        // Crear RequestBody para los campos de texto
+        RequestBody titulo = RequestBody.create(request.getTitulo(), okhttp3.MultipartBody.FORM);
+        RequestBody descripcion = RequestBody.create(request.getDescripcion(), okhttp3.MultipartBody.FORM);
+        RequestBody fecha = RequestBody.create(request.getFecha(), okhttp3.MultipartBody.FORM);
+        RequestBody lugar = RequestBody.create(request.getLugar(), okhttp3.MultipartBody.FORM);
+        RequestBody responsables = RequestBody.create(request.getResponsables(), okhttp3.MultipartBody.FORM);
+
+        MultipartBody.Part imagenPart = null;
+
+        // Preparar imagen si existe ruta y archivo
+        if (request.getImagenRuta() != null && !request.getImagenRuta().isEmpty()) {
+            File file = new File(request.getImagenRuta());
+            if (file.exists()) {
+                RequestBody requestFile = RequestBody.create(file, okhttp3.MediaType.parse("image/*"));
+                imagenPart = MultipartBody.Part.createFormData("imagen", file.getName(), requestFile);
+            }
+        }
+
+        Call<CrearActividadResponse> call = apiService.crearActividad(
+                "Bearer " + token,
+                titulo,
+                descripcion,
+                fecha,
+                lugar,
+                responsables,
+                imagenPart
+        );
+
         call.enqueue(new Callback<CrearActividadResponse>() {
             @Override
             public void onResponse(Call<CrearActividadResponse> call, Response<CrearActividadResponse> response) {
-                // Habilitar el botón y restaurar el texto
                 btnCrear.setEnabled(true);
                 btnCrear.setText("Crear Actividad");
 
@@ -404,22 +436,17 @@ public class CrearActividad extends AppCompatActivity {
                     CrearActividadResponse actividadResponse = response.body();
 
                     if (actividadResponse.isSuccess()) {
-                        // Si el backend reporta éxito, guardar también localmente
                         guardarActividadLocalDesdeResponse(actividadResponse, request);
                         Toast.makeText(CrearActividad.this, actividadResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                        setResult(RESULT_OK); // Indicar que la operación fue exitosa
-                        finish(); // Cerrar la actividad
+                        setResult(RESULT_OK);
+                        finish();
                     } else {
-                        // Si el backend responde con un error (ej. validación)
                         String errorMsg = actividadResponse.getError() != null ?
                                 actividadResponse.getError() : "Error desconocido del servidor";
                         Toast.makeText(CrearActividad.this, errorMsg, Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "Error del servidor: " + errorMsg);
-                        // En caso de un error específico del servidor, podríamos no guardar localmente si la acción fue rechazada.
-                        // Para este caso, mantenemos la lógica de no guardar localmente si hay un error del servidor.
                     }
                 } else {
-                    // Error en la respuesta HTTP (ej. 401 Unauthorized, 404 Not Found, 500 Internal Server Error)
                     Log.e(TAG, "Error HTTP: " + response.code() + " - " + response.message());
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
@@ -428,20 +455,17 @@ public class CrearActividad extends AppCompatActivity {
                         Log.e(TAG, "Error al leer errorBody: ", e);
                     }
                     Toast.makeText(CrearActividad.this, "Error al conectar con el servidor. Guardando localmente.", Toast.LENGTH_LONG).show();
-                    // Si hay un error HTTP, guardar localmente como fallback
                     guardarActividadLocalSoloRequest(request);
                 }
             }
 
             @Override
             public void onFailure(Call<CrearActividadResponse> call, Throwable t) {
-                // Habilitar el botón y restaurar el texto
                 btnCrear.setEnabled(true);
                 btnCrear.setText("Crear Actividad");
 
                 Log.e(TAG, "Error de conexión o red: " + t.getMessage(), t);
                 Toast.makeText(CrearActividad.this, "No se pudo conectar al servidor. Actividad guardada localmente.", Toast.LENGTH_LONG).show();
-                // Si hay un fallo de conexión (sin internet, servidor no disponible), guardar localmente
                 guardarActividadLocalSoloRequest(request);
             }
         });

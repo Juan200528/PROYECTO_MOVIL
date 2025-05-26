@@ -3,6 +3,7 @@ package com.juan.movil.ui.promocionadas;
 import android.app.Dialog;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,10 +50,14 @@ public class PromocionadasFragment extends Fragment implements PromocionadaAdapt
         viewModel = new ViewModelProvider(this).get(PromocionadasViewModel.class);
         viewModel.getActividadesPromocionadas().observe(getViewLifecycleOwner(), actividades -> {
             actividadList.clear();
-            actividadList.addAll(actividades);
+            if (actividades != null) {
+                actividadList.addAll(actividades);
+            }
             actividadAdapter.notifyDataSetChanged();
             actualizarVisibilidad();
         });
+
+        viewModel.cargarActividadesPromocionadas();
 
         return root;
     }
