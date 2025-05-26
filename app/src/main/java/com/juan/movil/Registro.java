@@ -1,18 +1,7 @@
 package com.juan.movil;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.TextPaint;
-import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.method.LinkMovementMethod;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +22,6 @@ public class Registro extends AppCompatActivity {
 
     EditText usernameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
     TextView loginLinkTextView;
-    Button btnRegistrar;
     ApiService apiService;
 
     @Override
@@ -47,63 +35,6 @@ public class Registro extends AppCompatActivity {
         passwordEditText = findViewById(R.id.passwordEditText);
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
         loginLinkTextView = findViewById(R.id.loginLinkTextView);
-        btnRegistrar = findViewById(R.id.btnRegistrar);
-
-        // Estilo botón registrar
-        btnRegistrar.setBackground(null);
-
-        GradientDrawable gradientNormal = new GradientDrawable(
-                GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[]{Color.parseColor("#03683E"), Color.parseColor("#064349")}
-        );
-        gradientNormal.setCornerRadius(80f);
-
-        GradientDrawable gradientPressed = new GradientDrawable();
-        gradientPressed.setColor(Color.parseColor("#063449"));
-        gradientPressed.setCornerRadius(80f);
-
-        StateListDrawable states = new StateListDrawable();
-        states.addState(new int[]{android.R.attr.state_pressed}, gradientPressed);
-        states.addState(new int[]{}, gradientNormal);
-
-        btnRegistrar.setBackground(states);
-
-        // Texto interactivo "¿Ya tienes cuenta? Entrar"
-        String fullText = "¿Ya tienes cuenta? Entrar";
-        SpannableString spannableString = new SpannableString(fullText);
-
-        spannableString.setSpan(
-                new ForegroundColorSpan(Color.parseColor("#064349")),
-                0, 18,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        );
-
-        spannableString.setSpan(
-                new ForegroundColorSpan(Color.parseColor("#39B1E0")),
-                18, fullText.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        );
-
-        ClickableSpan clickableSpan = new ClickableSpan() {
-            @Override
-            public void onClick(View widget) {
-                startActivity(new Intent(Registro.this, InicioSesion.class));
-                finish();
-            }
-
-            @Override
-            public void updateDrawState(TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setColor(Color.parseColor("#39B1E0"));
-                ds.setUnderlineText(false);
-            }
-        };
-
-        spannableString.setSpan(clickableSpan, 18, fullText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        loginLinkTextView.setText(spannableString);
-        loginLinkTextView.setMovementMethod(LinkMovementMethod.getInstance());
-        loginLinkTextView.setHighlightColor(Color.TRANSPARENT);
 
         // Configurar Retrofit
         Retrofit retrofit = new Retrofit.Builder()
@@ -113,7 +44,14 @@ public class Registro extends AppCompatActivity {
 
         apiService = retrofit.create(ApiService.class);
 
-        btnRegistrar.setOnClickListener(v -> registrarUsuario());
+        // Registrar botón
+        findViewById(R.id.btnRegistrar).setOnClickListener(v -> registrarUsuario());
+
+        // Redirigir al login si ya tiene cuenta
+        loginLinkTextView.setOnClickListener(v -> {
+            startActivity(new Intent(Registro.this, InicioSesion.class));
+            finish();
+        });
     }
 
     private void registrarUsuario() {
@@ -122,6 +60,7 @@ public class Registro extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
         String confirmPassword = confirmPasswordEditText.getText().toString();
 
+        // Validaciones
         if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
             return;
@@ -134,6 +73,7 @@ public class Registro extends AppCompatActivity {
 
         RegistroRequest request = new RegistroRequest(username, email, password);
 
+        // Enviar solicitud de registro
         Call<RegistroResponse> call = apiService.registrarUsuario(request);
         call.enqueue(new Callback<RegistroResponse>() {
             @Override

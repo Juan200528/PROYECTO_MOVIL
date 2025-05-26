@@ -1,14 +1,13 @@
 package com.juan.movil.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class RegistroResponse {
+
+    @SerializedName("msg") // <-- Ajusta si el backend devuelve "message" u otro campo
     private String message;
-    private String token;
 
     public String getMessage() {
         return message;
-    }
-
-    public String getToken() {
-        return token;
     }
 }
